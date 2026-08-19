@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: engineering-opportunities-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: opportunity_atlas
+      - key: CORS_ORIGINS
+        sync: false
+

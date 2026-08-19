@@ -1,0 +1,12 @@
+[project]
+name = "engineering-opportunities-dashboard"
+version = "0.1.0"
+description = "Trusted event discovery portal for engineering students in Telangana"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1"
+]
+
+[tool.uv]
+package = false

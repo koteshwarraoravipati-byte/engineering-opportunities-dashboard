@@ -1,0 +1,19 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local data may contain unreviewed or sensitive records
+/data/*.local.json
+
+# Editors and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
