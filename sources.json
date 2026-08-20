@@ -1,0 +1,56 @@
+{
+  "scope": "Warangal engineering colleges",
+  "refreshCadence": "daily",
+  "publicationPolicy": {
+    "requiredFields": ["title", "startAt", "organizer", "sourceUrl"],
+    "requireOfficialSource": true,
+    "reviewWhenConfidenceBelow": 0.75,
+    "autoExpire": true
+  },
+  "sources": [
+    {
+      "id": "nitw-main",
+      "name": "National Institute of Technology Warangal",
+      "type": "official_college",
+      "homepage": "https://www.nitw.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Use official event, department, student activity and CCPD pages only; publish only records with current verified dates."
+    },
+    {
+      "id": "nitw-ccpd",
+      "name": "NIT Warangal Centre for Career Planning and Development",
+      "type": "official_placement",
+      "homepage": "https://nitw.ac.in/ccpd",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Career and internship notices require an explicit opportunity date/deadline before publication."
+    },
+    {
+      "id": "kitsw-main",
+      "name": "Kakatiya Institute of Technology and Science, Warangal",
+      "type": "official_college",
+      "homepage": "https://kitsw.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Check Student Activity Center, circulars, departments, internships and placements."
+    },
+    {
+      "id": "ku-events",
+      "name": "Kakatiya University, Warangal — Events",
+      "type": "official_university",
+      "homepage": "https://kakatiya.ac.in/more/events",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Publish engineering-relevant events first; general university events require relevance tagging."
+    },
+    {
+      "id": "external-approved-only",
+      "name": "External platforms",
+      "type": "external_platform",
+      "approved": false,
+      "collectionStatus": "blocked_pending_permission",
+      "notes": "Enable only after documented API access, partnership, or written permission."
+    }
+  ]
+}
