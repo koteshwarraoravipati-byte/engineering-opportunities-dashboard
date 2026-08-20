@@ -236,6 +236,12 @@ def current_user(authorization: str | None = Header(default=None)) -> dict:
     return user
 
 
+def require_admin(user: dict = Depends(current_user)) -> dict:
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Administrator access required")
+    return user
+
+
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", "environment": "production" if store.mode == "mongodb" else "local-demo", "dataMode": store.mode, "auth": "email-password"}
@@ -342,8 +348,8 @@ def overview() -> dict:
 
 
 @app.post("/api/admin/events", status_code=201)
-def create_event(payload: EventCreate) -> dict:
-    """Intake endpoint; events stay private until reviewer approval. Add role checks before using this endpoint."""
+def create_event(payload: EventCreate, _: dict = Depends(require_admin)) -> dict:
+    """Authenticated administrator intake; events stay private until reviewer approval."""
     if payload.endAt and payload.endAt < payload.startAt:
         raise HTTPException(status_code=422, detail="endAt must be after startAt")
     event = payload.model_dump(mode="json")
@@ -356,8 +362,8 @@ def create_event(payload: EventCreate) -> dict:
 
 
 @app.post("/api/admin/events/{event_id}/publish")
-def publish_event(event_id: str) -> dict:
-    """Development-only endpoint. Protect with administrator authentication before public launch."""
+def publish_event(event_id: str, _: dict = Depends(require_admin)) -> dict:
+    """Authenticated administrator publishing endpoint."""
     event = store.update(event_id, {"visibility": "published", "sourceStatus": "verified", "lastCheckedAt": timestamp()})
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
