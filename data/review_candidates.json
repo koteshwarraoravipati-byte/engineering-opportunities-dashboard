@@ -1,0 +1,37 @@
+{
+  "runAt": "2026-08-21T03:37:10.918732+00:00",
+  "candidates": [
+    {
+      "candidateId": "ac252b920418955b",
+      "sourceId": "kitsw-main",
+      "title": "Training & Placement",
+      "sourceUrl": "https://www.kitsw.ac.in/departments/Training_placement/home.html",
+      "discoveredAt": "2026-08-21T03:36:50.386931+00:00",
+      "status": "needs_review",
+      "reason": "Official source candidate; date and eligibility must be verified before publication."
+    },
+    {
+      "candidateId": "4c12761455cda1cc",
+      "sourceId": "kitsw-main",
+      "title": "Summer In-House Internships at KITSW",
+      "sourceUrl": "https://kitsw.ac.in/summer_internships.html",
+      "discoveredAt": "2026-08-21T03:36:50.386931+00:00",
+      "status": "needs_review",
+      "reason": "Official source candidate; date and eligibility must be verified before publication."
+    }
+  ],
+  "errors": [
+    {
+      "sourceId": "nitw-main",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)>"
+    },
+    {
+      "sourceId": "nitw-ccpd",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)>"
+    },
+    {
+      "sourceId": "ku-events",
+      "error": "<urlopen error timed out>"
+    }
+  ]
+}
