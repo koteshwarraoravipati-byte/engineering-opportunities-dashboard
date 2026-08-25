@@ -1,12 +1,12 @@
 {
-  "runAt": "2026-08-24T03:40:23.925859+00:00",
+  "runAt": "2026-08-25T03:29:27.169482+00:00",
   "candidates": [
     {
       "candidateId": "ac252b920418955b",
       "sourceId": "kitsw-main",
       "title": "Training & Placement",
       "sourceUrl": "https://www.kitsw.ac.in/departments/Training_placement/home.html",
-      "discoveredAt": "2026-08-24T03:40:03.438866+00:00",
+      "discoveredAt": "2026-08-25T03:29:06.725911+00:00",
       "status": "needs_review",
       "reason": "Official source candidate; date and eligibility must be verified before publication."
     },
@@ -15,7 +15,7 @@
       "sourceId": "kitsw-main",
       "title": "Summer In-House Internships at KITSW",
       "sourceUrl": "https://kitsw.ac.in/summer_internships.html",
-      "discoveredAt": "2026-08-24T03:40:03.438866+00:00",
+      "discoveredAt": "2026-08-25T03:29:06.725911+00:00",
       "status": "needs_review",
       "reason": "Official source candidate; date and eligibility must be verified before publication."
     }
