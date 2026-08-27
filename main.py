@@ -1,375 +1,162 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
 import json
 import os
 import re
-from datetime import datetime, timedelta, timezone
+import secrets
+import threading
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Literal
-from uuid import uuid4
+from typing import Any
 
 import bcrypt
-import jwt
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parent
-DATA_PATH = ROOT / "events.json"
-USERS_PATH = ROOT / "users.local.json"
-FRONTEND = ROOT
-MONGODB_URI = os.getenv("MONGODB_URI", "").strip()
-MONGODB_DB = os.getenv("MONGODB_DB", "opportunity_atlas")
-AUTH_SECRET = os.getenv("AUTH_JWT_SECRET", "").strip()
-AUTH_TTL_HOURS = int(os.getenv("AUTH_TOKEN_TTL_HOURS", "168"))
-CORS_ORIGINS = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000").split(",") if item.strip()]
+DATA = ROOT / "data"
+DATA.mkdir(exist_ok=True)
+USERS_FILE = DATA / "users.json"
+SAVED_FILE = DATA / "saved.json"
+EVENTS_FILE = ROOT / "events.json"
+SECRET = os.getenv("SESSION_SECRET", "opportunity-atlas-dev-secret-change-me").encode()
+EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
+LOCK = threading.Lock()
 
-if not AUTH_SECRET:
-    # Local/demo fallback only. Render production must set AUTH_JWT_SECRET.
-    AUTH_SECRET = "local-development-only-change-me"
+app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
+origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+app.add_middleware(CORSMiddleware, allow_origins=origins if origins else ["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 
-app = FastAPI(title="Engineering Opportunities Dashboard", version="0.3.0")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
-)
-app.mount("/assets", StaticFiles(directory=FRONTEND), name="assets")
+FALLBACK_EVENTS = [
+    {"id":"warangal-1","title":"Graduate Software Engineer","organization":"Tech Mahindra","location":"Warangal, Telangana","area":"Warangal","college":"Any college","branch":"CSE / IT / ECE","year":"2025 / 2026","type":"Full-time","deadline":"30 Sep 2026","summary":"Build customer-facing software with a structured engineering onboarding programme.","description":"An early-career engineering role for students and recent graduates who enjoy problem solving, APIs, and collaborative delivery.","eligibility":"B.Tech / B.E. students and graduates in CSE, IT, or ECE. Strong programming fundamentals preferred.","applyUrl":"https://careers.techmahindra.com/","tags":["Software","Graduate","Warangal"]},
+    {"id":"warangal-2","title":"Frontend Development Internship","organization":"SR Innovation Hub","location":"Warangal, Telangana","area":"Warangal","college":"SR University","branch":"CSE / IT","year":"2026","type":"Internship","deadline":"15 Oct 2026","summary":"Ship accessible web experiences alongside mentors from the local engineering community.","description":"A practical internship focused on modern frontend development, product thinking, and portfolio-ready work.","eligibility":"Current B.Tech students in CSE or IT with HTML, CSS, and JavaScript fundamentals.","applyUrl":"https://www.sru.edu.in/","tags":["Frontend","Internship","Warangal"]},
+    {"id":"warangal-3","title":"Data & AI Challenge 2026","organization":"T-Hub Community","location":"Warangal / Hybrid","area":"Warangal","college":"Any college","branch":"All engineering branches","year":"2025 / 2026","type":"Challenge","deadline":"01 Nov 2026","summary":"Solve a real-world Telangana problem and present your prototype to industry judges.","description":"A team challenge with workshops, expert feedback, and an opportunity to turn a strong prototype into a career conversation.","eligibility":"Open to engineering students and recent graduates. Teams of 2–4 are welcome.","applyUrl":"https://t-hub.co/","tags":["AI","Challenge","Hybrid"]}
+]
 
-
-class EventCreate(BaseModel):
-    title: str = Field(min_length=4, max_length=180)
-    summary: str = Field(min_length=10, max_length=1000)
-    eventType: Literal["hackathon", "workshop", "internship", "seminar", "webinar", "conference", "competition", "bootcamp", "other"]
-    mode: Literal["online", "offline", "hybrid", "unknown"] = "unknown"
-    startAt: datetime
-    endAt: datetime | None = None
-    venue: str = "Not yet confirmed"
-    organizer: str = Field(min_length=2, max_length=160)
-    institution: str = Field(min_length=2, max_length=160)
-    registrationUrl: HttpUrl
-    sourceUrl: HttpUrl
-    sourceType: Literal["official_college", "approved_partner", "manual"] = "manual"
-    tags: list[str] = []
-
-
-class RegisterRequest(BaseModel):
-    fullName: str = Field(min_length=2, max_length=80)
-    email: str = Field(min_length=5, max_length=254)
+class Credentials(BaseModel):
+    email: str
     password: str = Field(min_length=8, max_length=128)
+    name: str = Field(default="", max_length=80)
 
+class SavedRequest(BaseModel):
+    event_id: str
 
-class LoginRequest(BaseModel):
-    email: str = Field(min_length=5, max_length=254)
-    password: str = Field(min_length=8, max_length=128)
-
-
-class SavedOpportunityRequest(BaseModel):
-    eventId: str = Field(min_length=3, max_length=80)
-
-
-class EventStore:
-    """Uses MongoDB Atlas when MONGODB_URI exists; otherwise preserves local demo data in JSON."""
-
-    def __init__(self) -> None:
-        self.collection = None
-        self.users_collection = None
-        if MONGODB_URI:
-            try:
-                from pymongo import MongoClient
-                client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
-                client.admin.command("ping")
-                database = client[MONGODB_DB]
-                self.collection = database["events"]
-                self.users_collection = database["users"]
-                self.collection.create_index("id", unique=True)
-                self.collection.create_index([("visibility", 1), ("startAt", 1)])
-                self.users_collection.create_index("email", unique=True)
-                # Preserve the verified JSON records during the first Atlas startup.
-                if self.collection.count_documents({}) == 0 and DATA_PATH.exists():
-                    seed_events = json.loads(DATA_PATH.read_text(encoding="utf-8"))
-                    if seed_events:
-                        self.collection.insert_many(seed_events)
-            except Exception as exc:
-                raise RuntimeError("MongoDB is configured but unavailable. Check MONGODB_URI and Atlas network access.") from exc
-
-    @property
-    def mode(self) -> str:
-        return "mongodb" if self.collection is not None else "seed-json"
-
-    def all(self) -> list[dict]:
-        if self.collection is None:
-            return json.loads(DATA_PATH.read_text(encoding="utf-8"))
-        return [{key: value for key, value in record.items() if key != "_id"} for record in self.collection.find({})]
-
-    def save_all(self, events: list[dict]) -> None:
-        if self.collection is None:
-            DATA_PATH.write_text(json.dumps(events, indent=2, ensure_ascii=False), encoding="utf-8")
-            return
-        self.collection.delete_many({})
-        if events:
-            self.collection.insert_many(events)
-
-    def insert(self, event: dict) -> None:
-        if self.collection is None:
-            events = self.all()
-            events.append(event)
-            self.save_all(events)
-        else:
-            self.collection.insert_one(event)
-
-    def update(self, event_id: str, patch: dict) -> dict | None:
-        if self.collection is None:
-            events = self.all()
-            for event in events:
-                if event["id"] == event_id:
-                    event.update(patch)
-                    self.save_all(events)
-                    return event
-            return None
-        from pymongo import ReturnDocument
-        record = self.collection.find_one_and_update({"id": event_id}, {"$set": patch}, return_document=ReturnDocument.AFTER)
-        if record is None:
-            return None
-        record.pop("_id", None)
-        return record
-
-    def users(self) -> list[dict]:
-        if self.users_collection is not None:
-            return [{key: value for key, value in record.items() if key != "_id"} for record in self.users_collection.find({})]
-        if not USERS_PATH.exists():
-            return []
-        return json.loads(USERS_PATH.read_text(encoding="utf-8"))
-
-    def save_users(self, users: list[dict]) -> None:
-        if self.users_collection is not None:
-            self.users_collection.delete_many({})
-            if users:
-                self.users_collection.insert_many(users)
-            return
-        USERS_PATH.write_text(json.dumps(users, indent=2, ensure_ascii=False), encoding="utf-8")
-
-    def insert_user(self, user: dict) -> None:
-        if self.users_collection is not None:
-            self.users_collection.insert_one(user)
-            return
-        users = self.users()
-        users.append(user)
-        self.save_users(users)
-
-    def find_user(self, email: str) -> dict | None:
-        normalized = email.lower().strip()
-        if self.users_collection is not None:
-            record = self.users_collection.find_one({"email": normalized})
-            if record:
-                record.pop("_id", None)
-            return record
-        return next((user for user in self.users() if user["email"] == normalized), None)
-
-    def update_user(self, user_id: str, patch: dict) -> dict | None:
-        if self.users_collection is not None:
-            from pymongo import ReturnDocument
-            record = self.users_collection.find_one_and_update({"id": user_id}, {"$set": patch}, return_document=ReturnDocument.AFTER)
-            if record:
-                record.pop("_id", None)
-            return record
-        users = self.users()
-        for user in users:
-            if user["id"] == user_id:
-                user.update(patch)
-                self.save_users(users)
-                return user
-        return None
-
-
-store = EventStore()
-
-
-def timestamp() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
-def normalized_email(value: str) -> str:
-    email = value.lower().strip()
-    if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
-        raise HTTPException(status_code=422, detail="Enter a valid email address")
-    return email
-
-
-def public_user(user: dict) -> dict:
-    return {
-        "id": user["id"],
-        "fullName": user["fullName"],
-        "email": user["email"],
-        "role": user.get("role", "student"),
-        "savedEventIds": user.get("savedEventIds", []),
-        "createdAt": user["createdAt"],
-    }
-
-
-def issue_token(user: dict) -> str:
-    now = datetime.now(timezone.utc)
-    claims = {
-        "sub": user["id"],
-        "role": user.get("role", "student"),
-        "iat": now,
-        "exp": now + timedelta(hours=AUTH_TTL_HOURS),
-        "iss": "opportunity-atlas",
-    }
-    return jwt.encode(claims, AUTH_SECRET, algorithm="HS256")
-
-
-def current_user(authorization: str | None = Header(default=None)) -> dict:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Sign in required")
+def read_json(path: Path, default: Any) -> Any:
     try:
-        payload = jwt.decode(authorization.split(" ", 1)[1], AUTH_SECRET, algorithms=["HS256"], issuer="opportunity-atlas")
-    except jwt.PyJWTError as exc:
-        raise HTTPException(status_code=401, detail="Your session has expired. Please sign in again.") from exc
-    user = next((candidate for candidate in store.users() if candidate["id"] == payload.get("sub")), None)
-    if not user:
-        raise HTTPException(status_code=401, detail="Account not found")
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return default
+
+def write_json(path: Path, value: Any) -> None:
+    temp = path.with_suffix(path.suffix + ".tmp")
+    temp.write_text(json.dumps(value, indent=2), encoding="utf-8")
+    temp.replace(path)
+
+def normalize_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
+    return {"id": str(raw.get("id") or raw.get("event_id") or f"opportunity-{index}"), "title": raw.get("title") or raw.get("name") or "Engineering opportunity", "organization": raw.get("organization") or raw.get("organizer") or raw.get("company") or "Local engineering community", "location": raw.get("location") or "Warangal, Telangana", "area": raw.get("area") or "Warangal", "college": raw.get("college") or "Any college", "branch": raw.get("branch") or raw.get("eligibility") or "All engineering branches", "year": raw.get("year") or "2025 / 2026", "type": raw.get("type") or raw.get("eventType") or "Opportunity", "deadline": raw.get("deadline") or raw.get("deadlineAt") or "Rolling", "summary": raw.get("summary") or raw.get("description") or "Explore this engineering opportunity.", "description": raw.get("description") or raw.get("summary") or "Details available from the organizer.", "eligibility": raw.get("eligibility") or "Check the organizer page for eligibility details.", "applyUrl": raw.get("applyUrl") or raw.get("url") or "#", "tags": raw.get("tags") or [raw.get("type") or "Opportunity"]}
+
+def load_events() -> list[dict[str, Any]]:
+    raw = read_json(EVENTS_FILE, [])
+    if isinstance(raw, dict): raw = raw.get("events", [])
+    items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
+    warangal = [e for e in items if "warangal" in json.dumps(e).lower()]
+    return warangal[:3] if len(warangal) >= 3 else FALLBACK_EVENTS
+
+def token_for(email: str) -> str:
+    payload = base64.urlsafe_b64encode(json.dumps({"email": email, "exp": int(datetime.now(timezone.utc).timestamp()) + 60 * 60 * 24 * 7}, separators=(",", ":")).encode()).decode().rstrip("=")
+    sig = hmac.new(SECRET, payload.encode(), hashlib.sha256).hexdigest()
+    return payload + "." + sig
+
+def email_from_token(authorization: str | None) -> str:
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Please sign in to continue")
+    try:
+        payload, sig = authorization.split(" ", 1)[1].split(".", 1)
+        if not hmac.compare_digest(sig, hmac.new(SECRET, payload.encode(), hashlib.sha256).hexdigest()): raise ValueError
+        data = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        if int(data["exp"]) < int(datetime.now(timezone.utc).timestamp()): raise ValueError
+        return str(data["email"]).lower()
+    except (ValueError, KeyError, TypeError, json.JSONDecodeError, UnicodeDecodeError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired. Please sign in again")
+
+def public_user(user: dict[str, Any]) -> dict[str, Any]:
+    return {"email": user["email"], "name": user.get("name") or user["email"].split("@")[0], "created_at": user.get("created_at")}
+
+def current_user(authorization: str | None = Header(default=None)) -> dict[str, Any]:
+    email = email_from_token(authorization)
+    users = read_json(USERS_FILE, {})
+    user = users.get(email)
+    if not user: raise HTTPException(status_code=401, detail="Account not found")
     return user
-
-
-def require_admin(user: dict = Depends(current_user)) -> dict:
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Administrator access required")
-    return user
-
 
 @app.get("/api/health")
-def health() -> dict:
-    return {"status": "ok", "environment": "production" if store.mode == "mongodb" else "local-demo", "dataMode": store.mode, "auth": "email-password"}
-
+def health() -> dict[str, Any]:
+    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(load_events())}
 
 @app.post("/api/auth/register", status_code=201)
-def register(payload: RegisterRequest) -> dict:
-    email = normalized_email(payload.email)
-    if store.find_user(email):
-        raise HTTPException(status_code=409, detail="An account already exists for this email. Please sign in.")
-    user = {
-        "id": f"usr-{uuid4().hex[:12]}",
-        "fullName": " ".join(payload.fullName.split()),
-        "email": email,
-        "passwordHash": bcrypt.hashpw(payload.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
-        "role": "student",
-        "savedEventIds": [],
-        "createdAt": timestamp(),
-        "updatedAt": timestamp(),
-    }
-    store.insert_user(user)
-    return {"token": issue_token(user), "user": public_user(user)}
-
+def register(payload: Credentials) -> dict[str, Any]:
+    email = payload.email.strip().lower()
+    if not EMAIL_RE.fullmatch(email): raise HTTPException(status_code=422, detail="Use a valid Gmail address")
+    if len(payload.password) < 8: raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
+    with LOCK:
+        users = read_json(USERS_FILE, {})
+        if email in users: raise HTTPException(status_code=409, detail="An account with this email already exists")
+        users[email] = {"email":email, "name":payload.name.strip(), "password_hash":bcrypt.hashpw(payload.password.encode(), bcrypt.gensalt()).decode(), "created_at":datetime.now(timezone.utc).isoformat()}
+        write_json(USERS_FILE, users)
+    user = users[email]
+    return {"token":token_for(email), "user":public_user(user)}
 
 @app.post("/api/auth/login")
-def login(payload: LoginRequest) -> dict:
-    user = store.find_user(normalized_email(payload.email))
-    if not user or not bcrypt.checkpw(payload.password.encode("utf-8"), user["passwordHash"].encode("utf-8")):
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
-    return {"token": issue_token(user), "user": public_user(user)}
-
+def login(payload: Credentials) -> dict[str, Any]:
+    email = payload.email.strip().lower()
+    users = read_json(USERS_FILE, {})
+    user = users.get(email)
+    if not user or not bcrypt.checkpw(payload.password.encode(), user["password_hash"].encode()): raise HTTPException(status_code=401, detail="Email or password is incorrect")
+    return {"token":token_for(email), "user":public_user(user)}
 
 @app.get("/api/auth/me")
-def me(user: dict = Depends(current_user)) -> dict:
-    return public_user(user)
-
-
-@app.get("/api/me/saved")
-def saved_opportunities(user: dict = Depends(current_user)) -> list[dict]:
-    saved_ids = set(user.get("savedEventIds", []))
-    return [event for event in store.all() if event["id"] in saved_ids and event.get("visibility") == "published"]
-
-
-@app.post("/api/me/saved")
-def save_opportunity(payload: SavedOpportunityRequest, user: dict = Depends(current_user)) -> dict:
-    event = next((event for event in store.all() if event["id"] == payload.eventId and event.get("visibility") == "published"), None)
-    if not event:
-        raise HTTPException(status_code=404, detail="Published opportunity not found")
-    saved = user.get("savedEventIds", [])
-    if payload.eventId not in saved:
-        saved.append(payload.eventId)
-    updated = store.update_user(user["id"], {"savedEventIds": saved, "updatedAt": timestamp()})
-    return public_user(updated or user)
-
-
-@app.delete("/api/me/saved/{event_id}")
-def remove_saved_opportunity(event_id: str, user: dict = Depends(current_user)) -> dict:
-    saved = [item for item in user.get("savedEventIds", []) if item != event_id]
-    updated = store.update_user(user["id"], {"savedEventIds": saved, "updatedAt": timestamp()})
-    return public_user(updated or user)
-
+def me(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    return {"user":public_user(user)}
 
 @app.get("/api/events")
-def list_events(
-    q: str | None = None,
-    event_type: str | None = Query(default=None, alias="type"),
-    mode: str | None = None,
-    status: Literal["published", "review", "all"] = "published",
-) -> list[dict]:
-    events = store.all()
-    if status == "published":
-        events = [e for e in events if e["visibility"] == "published"]
-    elif status == "review":
-        events = [e for e in events if e["visibility"] != "published" or e["sourceStatus"] == "needs_review"]
-    if event_type:
-        events = [e for e in events if e["eventType"] == event_type]
-    if mode:
-        events = [e for e in events if e["mode"] == mode]
-    if q:
-        needle = q.lower().strip()
-        events = [e for e in events if needle in " ".join([e["title"], e["summary"], e["organizer"], e["institution"], " ".join(e["tags"])]).lower()]
-    return sorted(events, key=lambda e: e["startAt"])
+def events(area: str | None = None, college: str | None = None, branch: str | None = None, year: str | None = None, q: str | None = None, user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any]]:
+    values = load_events()
+    def matches(e: dict[str, Any]) -> bool:
+        text = json.dumps(e).lower()
+        return (not area or area.lower() in text) and (not college or college.lower() in text) and (not branch or branch.lower() in text) and (not year or year.lower() in text) and (not q or q.lower() in text)
+    return [e for e in values if matches(e)]
 
+@app.get("/api/me/saved")
+def get_saved(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    all_saved = read_json(SAVED_FILE, {})
+    return {"event_ids": all_saved.get(user["email"], [])}
 
-@app.get("/api/events/{event_id}")
-def get_event(event_id: str) -> dict:
-    for event in store.all():
-        if event["id"] == event_id:
-            return event
-    raise HTTPException(status_code=404, detail="Event not found")
+@app.post("/api/me/saved")
+def save_opportunity(payload: SavedRequest, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    valid_ids = {e["id"] for e in load_events()}
+    if payload.event_id not in valid_ids: raise HTTPException(status_code=404, detail="Opportunity not found")
+    with LOCK:
+        all_saved = read_json(SAVED_FILE, {})
+        saved = list(dict.fromkeys(all_saved.get(user["email"], [])))
+        if payload.event_id not in saved: saved.append(payload.event_id)
+        all_saved[user["email"]] = saved
+        write_json(SAVED_FILE, all_saved)
+    return {"event_ids":saved}
 
-
-@app.get("/api/analytics/overview")
-def overview() -> dict:
-    events = store.all()
-    published = [e for e in events if e["visibility"] == "published"]
-    return {
-        "published": len(published),
-        "needsReview": len([e for e in events if e["sourceStatus"] == "needs_review"]),
-        "institutions": len({e["institution"] for e in published}),
-        "sourceHealth": round(sum(e["confidence"] for e in published) / len(published) * 100) if published else 0,
-        "byType": {kind: len([e for e in published if e["eventType"] == kind]) for kind in ["hackathon", "workshop", "internship", "seminar"]},
-    }
-
-
-@app.post("/api/admin/events", status_code=201)
-def create_event(payload: EventCreate, _: dict = Depends(require_admin)) -> dict:
-    """Authenticated administrator intake; events stay private until reviewer approval."""
-    if payload.endAt and payload.endAt < payload.startAt:
-        raise HTTPException(status_code=422, detail="endAt must be after startAt")
-    event = payload.model_dump(mode="json")
-    event.update({
-        "id": f"evt-{uuid4().hex[:10]}", "sourceStatus": "needs_review", "visibility": "draft",
-        "confidence": 0.0, "lastCheckedAt": timestamp(), "deadlineAt": None,
-    })
-    store.insert(event)
-    return event
-
-
-@app.post("/api/admin/events/{event_id}/publish")
-def publish_event(event_id: str, _: dict = Depends(require_admin)) -> dict:
-    """Authenticated administrator publishing endpoint."""
-    event = store.update(event_id, {"visibility": "published", "sourceStatus": "verified", "lastCheckedAt": timestamp()})
-    if event is None:
-        raise HTTPException(status_code=404, detail="Event not found")
-    return event
-
+@app.delete("/api/me/saved/{event_id}")
+def remove_saved(event_id: str, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    with LOCK:
+        all_saved = read_json(SAVED_FILE, {})
+        saved = [x for x in all_saved.get(user["email"], []) if x != event_id]
+        all_saved[user["email"]] = saved
+        write_json(SAVED_FILE, all_saved)
+    return {"event_ids":saved}
 
 @app.get("/")
-def homepage() -> FileResponse:
-    return FileResponse(FRONTEND / "index.html")
+def home() -> FileResponse:
+    return FileResponse(ROOT / "index.html")
