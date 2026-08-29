@@ -29,7 +29,8 @@ EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
 LOCK = threading.Lock()
 
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
-origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+configured_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+origins = ["*"] if "*" in configured_origins else list(dict.fromkeys(configured_origins + ["https://eod-warangal.vercel.app", "https://engineering-opportunities-dashboard.vercel.app"]))
 app.add_middleware(CORSMiddleware, allow_origins=origins if origins else ["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 
 FALLBACK_EVENTS = [
@@ -42,6 +43,12 @@ class Credentials(BaseModel):
     email: str
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(default="", max_length=80)
+    recovery_pin: str = Field(min_length=4, max_length=12)
+
+class PasswordReset(BaseModel):
+    email: str
+    recovery_pin: str = Field(min_length=4, max_length=12)
+    new_password: str = Field(min_length=8, max_length=128)
 
 class SavedRequest(BaseModel):
     event_id: str
@@ -101,12 +108,14 @@ def health() -> dict[str, Any]:
 @app.post("/api/auth/register", status_code=201)
 def register(payload: Credentials) -> dict[str, Any]:
     email = payload.email.strip().lower()
+    pin = payload.recovery_pin.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(status_code=422, detail="Use a valid Gmail address")
     if len(payload.password) < 8: raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
+    if not re.fullmatch(r"\d{4,12}", pin): raise HTTPException(status_code=422, detail="Screen lock / recovery PIN must be 4–12 digits")
     with LOCK:
         users = read_json(USERS_FILE, {})
         if email in users: raise HTTPException(status_code=409, detail="An account with this email already exists")
-        users[email] = {"email":email, "name":payload.name.strip(), "password_hash":bcrypt.hashpw(payload.password.encode(), bcrypt.gensalt()).decode(), "created_at":datetime.now(timezone.utc).isoformat()}
+        users[email] = {"email":email, "name":payload.name.strip(), "password_hash":bcrypt.hashpw(payload.password.encode(), bcrypt.gensalt()).decode(), "recovery_pin_hash":bcrypt.hashpw(pin.encode(), bcrypt.gensalt()).decode(), "created_at":datetime.now(timezone.utc).isoformat()}
         write_json(USERS_FILE, users)
     user = users[email]
     return {"token":token_for(email), "user":public_user(user)}
@@ -117,6 +126,24 @@ def login(payload: Credentials) -> dict[str, Any]:
     users = read_json(USERS_FILE, {})
     user = users.get(email)
     if not user or not bcrypt.checkpw(payload.password.encode(), user["password_hash"].encode()): raise HTTPException(status_code=401, detail="Email or password is incorrect")
+    return {"token":token_for(email), "user":public_user(user)}
+
+@app.post("/api/auth/reset")
+def reset_password(payload: PasswordReset) -> dict[str, Any]:
+    email = payload.email.strip().lower()
+    pin = payload.recovery_pin.strip()
+    if not EMAIL_RE.fullmatch(email) or not re.fullmatch(r"\d{4,12}", pin):
+        raise HTTPException(status_code=401, detail="Email or recovery PIN is incorrect")
+    with LOCK:
+        users = read_json(USERS_FILE, {})
+        user = users.get(email)
+        pin_hash = user.get("recovery_pin_hash") if user else None
+        if not user or not pin_hash or not bcrypt.checkpw(pin.encode(), pin_hash.encode()):
+            raise HTTPException(status_code=401, detail="Email or recovery PIN is incorrect")
+        user["password_hash"] = bcrypt.hashpw(payload.new_password.encode(), bcrypt.gensalt()).decode()
+        user["password_changed_at"] = datetime.now(timezone.utc).isoformat()
+        users[email] = user
+        write_json(USERS_FILE, users)
     return {"token":token_for(email), "user":public_user(user)}
 
 @app.get("/api/auth/me")
