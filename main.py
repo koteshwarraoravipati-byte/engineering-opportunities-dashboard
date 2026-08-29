@@ -43,6 +43,8 @@ class Credentials(BaseModel):
     email: str
     password: str = Field(min_length=8, max_length=128)
     name: str = Field(default="", max_length=80)
+
+class RegisterCredentials(Credentials):
     recovery_pin: str = Field(min_length=4, max_length=12)
 
 class PasswordReset(BaseModel):
@@ -106,7 +108,7 @@ def health() -> dict[str, Any]:
     return {"status":"ok", "service":"opportunity-atlas-api", "events":len(load_events())}
 
 @app.post("/api/auth/register", status_code=201)
-def register(payload: Credentials) -> dict[str, Any]:
+def register(payload: RegisterCredentials) -> dict[str, Any]:
     email = payload.email.strip().lower()
     pin = payload.recovery_pin.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(status_code=422, detail="Use a valid Gmail address")
