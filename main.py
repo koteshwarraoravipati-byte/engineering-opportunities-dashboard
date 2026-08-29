@@ -73,8 +73,9 @@ def load_events() -> list[dict[str, Any]]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
-    warangal = [e for e in items if "warangal" in json.dumps(e).lower()]
-    return warangal[:3] if len(warangal) >= 3 else FALLBACK_EVENTS
+    published = [e for e in items if str(e.get("visibility", "published")).lower() == "published"]
+    warangal = [e for e in published if "warangal" in json.dumps(e).lower()]
+    return warangal if warangal else FALLBACK_EVENTS
 
 def token_for(email: str) -> str:
     payload = base64.urlsafe_b64encode(json.dumps({"email": email, "exp": int(datetime.now(timezone.utc).timestamp()) + 60 * 60 * 24 * 7}, separators=(",", ":")).encode()).decode().rstrip("=")
