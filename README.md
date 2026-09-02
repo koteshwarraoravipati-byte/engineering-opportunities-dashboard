@@ -1,37 +1,32 @@
 # Engineering Opportunities Dashboard
 
-A working MVP portal for viewing verified engineering opportunities across Telangana.
+A student-first portal for verified engineering opportunities across Telangana.
 
-## What this build includes
-- FastAPI REST endpoints for events, analytics, local intake, and review/publish workflow.
-- Responsive web portal with search and opportunity-type/mode filters.
-- Source-first event records and explicit `verified`/`needs_review` statuses.
-- Clearly labeled demonstration data only; no live event claims and no automated collection yet.
+## Current behavior
+- Responsive portal with the existing card-based visual design, search, location, college, branch and graduation-year filters.
+- Telangana-wide location scope, currently seeded with verified official opportunities from Warangal, Hyderabad and Sangareddy.
+- Public records are shown only when they have a concrete date or deadline, an organizer/institution, a direct HTTPS source URL on an official institution domain, and an explicit `verified` status.
+- Undated or uncertain records remain in review and are not shown publicly.
+- No synthetic fallback opportunities are displayed when the verified dataset is empty.
+- Each published card links back to its official college/university source page.
+
+## Source and verification policy
+Google/search engines may be used to discover leads. The official engineering-college or university page is the only evidence accepted for publication. Third-party-only listings, copied social posts, expired records, unclear dates, duplicate records and unverified claims are blocked. The collector discovers candidates only; it never auto-publishes them.
 
 ## Run locally
 
 ```powershell
 uv sync
-uv run uvicorn backend.main:app --reload --port 8000
+uv run uvicorn main:app --reload --port 8000
 ```
 
-Open `http://127.0.0.1:8000` in Google Chrome.
+Open `http://127.0.0.1:8000`.
 
-## API routes
-- `GET /api/health`
-- `GET /api/events?type=hackathon&mode=offline&q=AI`
-- `GET /api/events/{id}`
-- `GET /api/analytics/overview`
-- `POST /api/admin/events` (creates a draft requiring review)
-- `POST /api/admin/events/{id}/publish`
+## Data workflow
+1. Maintain approved official institution domains in `sources.json`.
+2. Run `collector.py` to create review candidates.
+3. Verify the original official page, date/status, organizer, relevance, eligibility and application link.
+4. Add only reviewed records to `events.json` with `visibility: published` and `sourceStatus: verified`.
+5. The API performs a second publication guard before returning records.
 
-## Before production deployment
-1. Add authentication to all `/api/admin/*` routes.
-2. Replace `data/events.json` with MongoDB Atlas using encrypted environment variables.
-3. Build an approved institutional-domain registry and collectors that honor each source’s terms/robots policy.
-4. Obtain explicit API/partnership/written permission before automating any third-party platform such as Unstop or Internshala.
-5. Add rate limiting, logging, tests, CI, error monitoring, backups, and a privacy notice.
-6. Deploy the web service to a chosen host (for example Render/Railway) and connect a custom domain if required.
-
-## Important data policy
-This MVP intentionally does not scrape Google, Internshala, or Unstop. Search must be a discovery aid; the original permitted institutional page must be validated before an opportunity is published.
+Third-party platforms remain blocked: Google can discover a lead, but a third-party-only listing is never published without an official college evidence page.
