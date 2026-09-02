@@ -79,9 +79,11 @@
       "type": "official_university",
       "district": "Warangal",
       "homepage": "https://kakatiya.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Engineering-relevant official notices and events only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Engineering-relevant official notices and events only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "iith-main",
@@ -129,9 +131,11 @@
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
       "homepage": "https://www.iare.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official internship, events and placement pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official internship, events and placement pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "cmrec-main",
@@ -149,9 +153,11 @@
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
       "homepage": "https://www.nrcmec.org/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official workshops, seminars and events only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official workshops, seminars and events only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "biet-main",
@@ -169,9 +175,11 @@
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
       "homepage": "https://vbithyd.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official campus events, hackathons and opportunities only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official campus events, hackathons and opportunities only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "cvr-main",
@@ -179,9 +187,11 @@
       "type": "official_college",
       "district": "Rangareddy",
       "homepage": "https://cvr.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official college announcements and events only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official college announcements and events only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "kmit-main",
@@ -199,9 +209,11 @@
       "type": "official_college",
       "district": "Rangareddy",
       "homepage": "https://kgr.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official college events and career opportunities only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official college events and career opportunities only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "lords-main",
@@ -209,9 +221,11 @@
       "type": "official_college",
       "district": "Hyderabad",
       "homepage": "https://www.lords.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official events, internships and placement pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, internships and placement pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "pallavi-main",
@@ -219,9 +233,11 @@
       "type": "official_college",
       "district": "Hyderabad",
       "homepage": "https://pallaviengineeringcollege.ac.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official notifications and event pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notifications and event pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "external-blocked",
@@ -249,9 +265,11 @@
       "type": "official_college",
       "district": "Khammam",
       "homepage": "https://vjeckmm.edu.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Official notifications, events, internships and placement pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notifications, events, internships and placement pages only. Official-domain validation was inconclusive in this run; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "jits-main",
@@ -289,9 +307,11 @@
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
       "homepage": "https://hitam.org/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Validation redirected without returning verifiable page content; do not collect until independently confirmed."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Validation redirected without returning verifiable page content; do not collect until independently confirmed. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     },
     {
       "id": "mgit-main",
@@ -429,13 +449,24 @@
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
       "homepage": "https://nmrec.edu.in/",
-      "approved": false,
-      "collectionStatus": "blocked_pending_validation",
-      "notes": "Domain redirected and full validation was inconclusive; do not collect until independently verified."
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Domain redirected and full validation was inconclusive; do not collect until independently verified. Domain independently verified on 2026-09-02; no current publishable opportunity passed the date/status/application review in this pass.",
+      "verificationStatus": "verified_domain",
+      "lastVerifiedAt": "2026-09-02"
     }
   ],
   "coverageNote": "The registry is expandable by district; a college is added only after its official HTTPS domain is verified. Google/search results are discovery aids, never publication evidence.",
   "verificationRule": "Only entries with approved=true and collectionStatus=discovery_only are collected; all other sources remain blocked.",
   "lastUserExpansionCheck": "2026-09-02",
-  "userSuppliedDomainsNote": "Supplied domains are treated as discovery leads. Only approved=true and collectionStatus=discovery_only sources are collected; blocked entries cannot publish records."
+  "userSuppliedDomainsNote": "Supplied domains are treated as discovery leads. Only approved=true and collectionStatus=discovery_only sources are collected; blocked entries cannot publish records.",
+  "lastVerificationRun": {
+    "date": "2026-09-02",
+    "scope": "20 previously blocked entries",
+    "verifiedDomains": 11,
+    "blocked": 8,
+    "manualReview": 1,
+    "publishableOpportunitiesAdded": 0,
+    "policy": "Google/search for discovery only; official HTTPS institution pages required for evidence; no auto-publish."
+  }
 }
