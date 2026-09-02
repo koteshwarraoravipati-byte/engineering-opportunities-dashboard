@@ -10,6 +10,7 @@ import secrets
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Any
 
 import bcrypt
@@ -33,12 +34,7 @@ configured_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",
 origins = ["*"] if "*" in configured_origins else list(dict.fromkeys(configured_origins + ["https://eod-warangal.vercel.app", "https://engineering-opportunities-dashboard.vercel.app"]))
 app.add_middleware(CORSMiddleware, allow_origins=origins if origins else ["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 
-FALLBACK_EVENTS = [
-    {"id":"warangal-1","title":"Graduate Software Engineer","organization":"Tech Mahindra","location":"Warangal, Telangana","area":"Warangal","college":"Any college","branch":"CSE / IT / ECE","year":"2025 / 2026","type":"Full-time","deadline":"30 Sep 2026","summary":"Build customer-facing software with a structured engineering onboarding programme.","description":"An early-career engineering role for students and recent graduates who enjoy problem solving, APIs, and collaborative delivery.","eligibility":"B.Tech / B.E. students and graduates in CSE, IT, or ECE. Strong programming fundamentals preferred.","applyUrl":"https://careers.techmahindra.com/","tags":["Software","Graduate","Warangal"]},
-    {"id":"warangal-2","title":"Frontend Development Internship","organization":"SR Innovation Hub","location":"Warangal, Telangana","area":"Warangal","college":"SR University","branch":"CSE / IT","year":"2026","type":"Internship","deadline":"15 Oct 2026","summary":"Ship accessible web experiences alongside mentors from the local engineering community.","description":"A practical internship focused on modern frontend development, product thinking, and portfolio-ready work.","eligibility":"Current B.Tech students in CSE or IT with HTML, CSS, and JavaScript fundamentals.","applyUrl":"https://www.sru.edu.in/","tags":["Frontend","Internship","Warangal"]},
-    {"id":"warangal-3","title":"Data & AI Challenge 2026","organization":"T-Hub Community","location":"Warangal / Hybrid","area":"Warangal","college":"Any college","branch":"All engineering branches","year":"2025 / 2026","type":"Challenge","deadline":"01 Nov 2026","summary":"Solve a real-world Telangana problem and present your prototype to industry judges.","description":"A team challenge with workshops, expert feedback, and an opportunity to turn a strong prototype into a career conversation.","eligibility":"Open to engineering students and recent graduates. Teams of 2–4 are welcome.","applyUrl":"https://t-hub.co/","tags":["AI","Challenge","Hybrid"]}
-]
-
+# Public records are intentionally empty when no verified official opportunity passes validation.
 class Credentials(BaseModel):
     email: str
     password: str = Field(min_length=8, max_length=128)
@@ -67,15 +63,28 @@ def write_json(path: Path, value: Any) -> None:
     temp.replace(path)
 
 def normalize_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
-    return {"id": str(raw.get("id") or raw.get("event_id") or f"opportunity-{index}"), "title": raw.get("title") or raw.get("name") or "Engineering opportunity", "organization": raw.get("organization") or raw.get("organizer") or raw.get("company") or "Local engineering community", "institution": raw.get("institution") or raw.get("college") or raw.get("organization") or "Warangal engineering community", "location": raw.get("location") or raw.get("venue") or "Warangal, Telangana", "venue": raw.get("venue") or raw.get("location") or "Warangal, Telangana", "area": raw.get("area") or "Warangal", "college": raw.get("college") or raw.get("institution") or "Any college", "branch": raw.get("branch") or raw.get("eligibility") or "All engineering branches", "year": raw.get("year") or "2025 / 2026", "type": raw.get("type") or raw.get("eventType") or "Opportunity", "mode": raw.get("mode") or "See organizer page", "startAt": raw.get("startAt"), "endAt": raw.get("endAt"), "deadline": raw.get("deadline") or raw.get("deadlineAt") or "Rolling", "deadlineAt": raw.get("deadlineAt"), "summary": raw.get("summary") or raw.get("description") or "Explore this engineering opportunity.", "description": raw.get("description") or raw.get("summary") or "Details available from the organizer.", "eligibility": raw.get("eligibility") or "Check the organizer page for eligibility details.", "applyUrl": raw.get("applyUrl") or raw.get("registrationUrl") or raw.get("url") or "#", "sourceUrl": raw.get("sourceUrl"), "sourceStatus": raw.get("sourceStatus") or "verified", "confidence": raw.get("confidence"), "tags": raw.get("tags") or [raw.get("type") or "Opportunity"]}
+    return {"id": str(raw.get("id") or raw.get("event_id") or f"opportunity-{index}"), "title": raw.get("title") or raw.get("name") or "Engineering opportunity", "organization": raw.get("organization") or raw.get("organizer") or raw.get("company") or "Local engineering community", "institution": raw.get("institution") or raw.get("college") or raw.get("organization") or "Warangal engineering community", "location": raw.get("location") or raw.get("venue") or "Warangal, Telangana", "venue": raw.get("venue") or raw.get("location") or "Warangal, Telangana", "state": raw.get("state") or "Telangana", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "college": raw.get("college") or raw.get("institution") or "Any college", "branch": raw.get("branch") or raw.get("eligibility") or "All engineering branches", "year": raw.get("year") or "2025 / 2026", "type": raw.get("type") or raw.get("eventType") or "Opportunity", "mode": raw.get("mode") or "See organizer page", "startAt": raw.get("startAt"), "endAt": raw.get("endAt"), "deadline": raw.get("deadline") or raw.get("deadlineAt") or "Rolling", "deadlineAt": raw.get("deadlineAt"), "summary": raw.get("summary") or raw.get("description") or "Explore this engineering opportunity.", "description": raw.get("description") or raw.get("summary") or "Details available from the organizer.", "eligibility": raw.get("eligibility") or "Check the organizer page for eligibility details.", "applyUrl": raw.get("applyUrl") or raw.get("registrationUrl") or raw.get("url") or "#", "sourceUrl": raw.get("sourceUrl"), "sourceStatus": raw.get("sourceStatus") or "verified", "confidence": raw.get("confidence"), "tags": raw.get("tags") or [raw.get("type") or "Opportunity"]}
+
+def has_official_source(event: dict[str, Any]) -> bool:
+    url = str(event.get("sourceUrl") or "").strip()
+    try:
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower().rstrip(".")
+    except ValueError:
+        return False
+    return parsed.scheme == "https" and (host.endswith(".edu.in") or host.endswith(".ac.in") or host.endswith(".org.in"))
+
+def publishable_event(event: dict[str, Any]) -> bool:
+    required = (event.get("title"), event.get("organizer"), event.get("institution"), event.get("sourceUrl"))
+    has_date_or_deadline = bool(event.get("startAt") or event.get("endAt") or event.get("deadlineAt"))
+    official_type = event.get("sourceType") in {"official_college", "official_university", "official_placement"}
+    return (str(event.get("visibility", "published")).lower() == "published" and str(event.get("sourceStatus", "")).lower() == "verified" and all(required) and has_date_or_deadline and official_type and has_official_source(event))
 
 def load_events() -> list[dict[str, Any]]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
-    published = [e for e in items if str(e.get("visibility", "published")).lower() == "published"]
-    warangal = [e for e in published if "warangal" in json.dumps(e).lower()]
-    return warangal if warangal else FALLBACK_EVENTS
+    return [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() == "telangana"]
 
 def token_for(email: str) -> str:
     payload = base64.urlsafe_b64encode(json.dumps({"email": email, "exp": int(datetime.now(timezone.utc).timestamp()) + 60 * 60 * 24 * 7}, separators=(",", ":")).encode()).decode().rstrip("=")
