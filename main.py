@@ -78,7 +78,7 @@ def has_official_source(event: dict[str, Any]) -> bool:
 def publishable_event(event: dict[str, Any]) -> bool:
     required = (event.get("title"), event.get("organizer"), event.get("institution"), event.get("sourceUrl"))
     has_date_or_deadline = bool(event.get("startAt") or event.get("endAt") or event.get("deadlineAt"))
-    official_type = event.get("sourceType") in {"official_college", "official_university", "official_placement"}
+    official_type = event.get("sourceType") in {"official_college", "official_university", "official_placement"} or has_official_source(event)
     return (str(event.get("visibility", "published")).lower() == "published" and str(event.get("sourceStatus", "")).lower() == "verified" and all(required) and has_date_or_deadline and official_type and has_official_source(event))
 
 def load_events() -> list[dict[str, Any]]:
@@ -118,7 +118,9 @@ def current_user(authorization: str | None = Header(default=None)) -> dict[str, 
 def health() -> dict[str, Any]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
-    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(load_events()), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "build":"622a47f"}
+    items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
+    published = [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() == "telangana"]
+    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "build":"e39076a"}
 
 @app.post("/api/auth/register", status_code=201)
 def register(payload: RegisterCredentials) -> dict[str, Any]:
