@@ -28,7 +28,30 @@ EVENTS_FILE = ROOT / "events.json"
 if not EVENTS_FILE.exists(): EVENTS_FILE = ROOT.parent / "events.json"
 SECRET = os.getenv("SESSION_SECRET", "opportunity-atlas-dev-secret-change-me").encode()
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
+EMAIL_STRIP_CHARS = dict.fromkeys(map(ord, "\u200b\u200c\u200d\ufeff"), None)
 LOCK = threading.Lock()
+
+def normalize_email(value: str) -> str:
+    """Return one stable key for the same Gmail address across all auth paths."""
+    return str(value or "").translate(EMAIL_STRIP_CHARS).strip().casefold()
+
+def normalize_users(raw: Any) -> dict[str, dict[str, Any]]:
+    """Migrate legacy keys and discard malformed records before auth lookups."""
+    if not isinstance(raw, dict):
+        return {}
+    normalized: dict[str, dict[str, Any]] = {}
+    for key, value in raw.items():
+        if not isinstance(value, dict):
+            continue
+        email = normalize_email(str(value.get("email") or key))
+        if not EMAIL_RE.fullmatch(email):
+            continue
+        user = dict(value)
+        user["email"] = email
+        previous = normalized.get(email)
+        if previous is None or str(user.get("created_at") or "") >= str(previous.get("created_at") or ""):
+            normalized[email] = user
+    return normalized
 
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
 configured_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
@@ -100,7 +123,7 @@ def email_from_token(authorization: str | None) -> str:
         if not hmac.compare_digest(sig, hmac.new(SECRET, payload.encode(), hashlib.sha256).hexdigest()): raise ValueError
         data = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
         if int(data["exp"]) < int(datetime.now(timezone.utc).timestamp()): raise ValueError
-        return str(data["email"]).lower()
+        return normalize_email(str(data["email"]))
     except (ValueError, KeyError, TypeError, json.JSONDecodeError, UnicodeDecodeError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired. Please sign in again")
 
@@ -109,7 +132,7 @@ def public_user(user: dict[str, Any]) -> dict[str, Any]:
 
 def current_user(authorization: str | None = Header(default=None)) -> dict[str, Any]:
     email = email_from_token(authorization)
-    users = read_json(USERS_FILE, {})
+    users = normalize_users(read_json(USERS_FILE, {}))
     user = users.get(email)
     if not user: raise HTTPException(status_code=401, detail="Account not found")
     return user
@@ -124,13 +147,13 @@ def health() -> dict[str, Any]:
 
 @app.post("/api/auth/register", status_code=201)
 def register(payload: RegisterCredentials) -> dict[str, Any]:
-    email = payload.email.strip().lower()
+    email = normalize_email(payload.email)
     pin = payload.recovery_pin.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(status_code=422, detail="Use a valid Gmail address")
     if len(payload.password) < 8: raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
     if not re.fullmatch(r"\d{4,12}", pin): raise HTTPException(status_code=422, detail="Screen lock / recovery PIN must be 4–12 digits")
     with LOCK:
-        users = read_json(USERS_FILE, {})
+        users = normalize_users(read_json(USERS_FILE, {}))
         if email in users: raise HTTPException(status_code=409, detail="An account with this email already exists")
         users[email] = {"email":email, "name":payload.name.strip(), "password_hash":bcrypt.hashpw(payload.password.encode(), bcrypt.gensalt()).decode(), "recovery_pin_hash":bcrypt.hashpw(pin.encode(), bcrypt.gensalt()).decode(), "created_at":datetime.now(timezone.utc).isoformat()}
         write_json(USERS_FILE, users)
@@ -139,10 +162,18 @@ def register(payload: RegisterCredentials) -> dict[str, Any]:
 
 @app.post("/api/auth/login")
 def login(payload: Credentials) -> dict[str, Any]:
-    email = payload.email.strip().lower()
-    users = read_json(USERS_FILE, {})
+    email = normalize_email(payload.email)
+    users = normalize_users(read_json(USERS_FILE, {}))
     user = users.get(email)
-    if not user or not bcrypt.checkpw(payload.password.encode(), user["password_hash"].encode()): raise HTTPException(status_code=401, detail="Email or password is incorrect")
+    stored_hash = str(user.get("password_hash") or "") if user else ""
+    try:
+        valid_password = bool(user and stored_hash and bcrypt.checkpw(payload.password.encode(), stored_hash.encode()))
+    except (ValueError, TypeError):
+        valid_password = False
+    if not user:
+        raise HTTPException(status_code=401, detail="Account not found. Please create a new account.")
+    if not valid_password:
+        raise HTTPException(status_code=401, detail="Email or password is incorrect")
     return {"token":token_for(email), "user":public_user(user)}
 
 @app.post("/api/auth/reset")
