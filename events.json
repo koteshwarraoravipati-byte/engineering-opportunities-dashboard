@@ -22,7 +22,10 @@
       "deep learning",
       "hands-on training"
     ],
-    "lastCheckedAt": "2026-08-29T12:00:00+05:30"
+    "lastCheckedAt": "2026-08-29T12:00:00+05:30",
+    "state": "Telangana",
+    "district": "Warangal",
+    "area": "Warangal"
   },
   {
     "id": "nitw-ised-2026",
@@ -47,7 +50,10 @@
       "embedded design",
       "conference"
     ],
-    "lastCheckedAt": "2026-08-29T12:00:00+05:30"
+    "lastCheckedAt": "2026-08-29T12:00:00+05:30",
+    "state": "Telangana",
+    "district": "Warangal",
+    "area": "Warangal"
   },
   {
     "id": "nitw-mica-2026",
@@ -72,7 +78,10 @@
       "machine intelligence",
       "conference"
     ],
-    "lastCheckedAt": "2026-08-29T12:00:00+05:30"
+    "lastCheckedAt": "2026-08-29T12:00:00+05:30",
+    "state": "Telangana",
+    "district": "Warangal",
+    "area": "Warangal"
   },
   {
     "id": "kitsw-summer-internships",
@@ -89,15 +98,18 @@
     "deadlineAt": null,
     "sourceUrl": "https://kitsw.ac.in/summer_internships.html",
     "sourceType": "official_college",
-    "sourceStatus": "verified",
-    "visibility": "published",
+    "sourceStatus": "needs_review",
+    "visibility": "needs_review",
     "confidence": 0.84,
     "tags": [
       "internship",
       "KITSW",
       "summer"
     ],
-    "lastCheckedAt": "2026-08-29T12:00:00+05:30"
+    "lastCheckedAt": "2026-08-29T12:00:00+05:30",
+    "state": "Telangana",
+    "district": "Warangal",
+    "area": "Warangal"
   },
   {
     "id": "kitsw-placements-training",
@@ -114,15 +126,18 @@
     "deadlineAt": null,
     "sourceUrl": "https://kitsw.ac.in/departments/Training_placement/ongoing_placements.html",
     "sourceType": "official_placement",
-    "sourceStatus": "verified",
-    "visibility": "published",
+    "sourceStatus": "needs_review",
+    "visibility": "needs_review",
     "confidence": 0.82,
     "tags": [
       "placements",
       "training",
       "KITSW"
     ],
-    "lastCheckedAt": "2026-08-29T12:00:00+05:30"
+    "lastCheckedAt": "2026-08-29T12:00:00+05:30",
+    "state": "Telangana",
+    "district": "Warangal",
+    "area": "Warangal"
   },
   {
     "id": "sru-drdo-jrf-2026",
@@ -139,8 +154,8 @@
     "deadlineAt": null,
     "sourceUrl": "https://sru.edu.in/assets/JRF-Creative-Poster.jpg",
     "sourceType": "official_university",
-    "sourceStatus": "verified",
-    "visibility": "published",
+    "sourceStatus": "needs_review",
+    "visibility": "needs_review",
     "confidence": 0.8,
     "tags": [
       "DRDO",
@@ -148,6 +163,152 @@
       "research",
       "SR University"
     ],
-    "lastCheckedAt": "2026-08-29T12:00:00+05:30"
+    "lastCheckedAt": "2026-08-29T12:00:00+05:30",
+    "state": "Telangana",
+    "district": "Warangal",
+    "area": "Warangal"
+  },
+  {
+    "id": "iith-sec-2026",
+    "title": "15th Structural Engineering Convention (SEC-2026)",
+    "summary": "An international structural engineering convention hosted by IIT Hyderabad from 20–23 December 2026. The official page lists the convention details and registration information.",
+    "eventType": "conference",
+    "mode": "offline",
+    "startAt": "2026-12-20T00:00:00+05:30",
+    "endAt": "2026-12-23T23:59:00+05:30",
+    "venue": "IIT Hyderabad, Kandi, Sangareddy District, Telangana",
+    "organizer": "Indian Institute of Technology Hyderabad under the aegis of the Indian Association for Structural Engineering",
+    "institution": "Indian Institute of Technology Hyderabad",
+    "registrationUrl": "https://civil.iith.ac.in/SEC2026/registration.html",
+    "deadlineAt": null,
+    "sourceUrl": "https://civil.iith.ac.in/SEC2026/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.96,
+    "state": "Telangana",
+    "district": "Sangareddy",
+    "area": "Sangareddy",
+    "tags": [
+      "structural engineering",
+      "conference",
+      "IIT Hyderabad"
+    ],
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+  },
+  {
+    "id": "iith-mechbio-2026",
+    "title": "MechBio 2026 — Second Indian Mechanobiology Annual Meeting",
+    "summary": "A two-day research meeting hosted at IIT Hyderabad on 12–13 October 2026. The official page lists registration through 15 September 2026.",
+    "eventType": "conference",
+    "mode": "offline",
+    "startAt": "2026-10-12T00:00:00+05:30",
+    "endAt": "2026-10-13T23:59:00+05:30",
+    "venue": "CCE, IIT Hyderabad, Telangana",
+    "organizer": "IIT Hyderabad, TIFR Hyderabad and BITS Pilani Hyderabad",
+    "institution": "Indian Institute of Technology Hyderabad",
+    "registrationUrl": "https://mechbio2026.iith.ac.in/registration.html",
+    "deadlineAt": "2026-09-15T23:59:00+05:30",
+    "sourceUrl": "https://mechbio2026.iith.ac.in/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.95,
+    "state": "Telangana",
+    "district": "Sangareddy",
+    "area": "Sangareddy",
+    "tags": [
+      "mechanobiology",
+      "research",
+      "conference",
+      "IIT Hyderabad"
+    ],
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+  },
+  {
+    "id": "iith-inae-2026",
+    "title": "INAE Engineers Conclave 2026",
+    "summary": "An engineering conclave jointly organized by the Indian National Academy of Engineering and IIT Hyderabad on 10–11 October 2026.",
+    "eventType": "conference",
+    "mode": "offline",
+    "startAt": "2026-10-10T00:00:00+05:30",
+    "endAt": "2026-10-11T23:59:00+05:30",
+    "venue": "Convention Centre, IIT Hyderabad, Telangana",
+    "organizer": "Indian National Academy of Engineering and Indian Institute of Technology Hyderabad",
+    "institution": "Indian Institute of Technology Hyderabad",
+    "registrationUrl": "https://forms.gle/2ycbCNCfoPwHfYr57",
+    "deadlineAt": "2026-09-15T23:59:00+05:30",
+    "sourceUrl": "https://inaeconclave2026.iith.ac.in/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.95,
+    "state": "Telangana",
+    "district": "Sangareddy",
+    "area": "Sangareddy",
+    "tags": [
+      "engineering",
+      "conclave",
+      "conference",
+      "IIT Hyderabad"
+    ],
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+  },
+  {
+    "id": "iith-ai-agents-2026",
+    "title": "Applied AI Professional Certification Program",
+    "summary": "A hybrid IIT Hyderabad CSE program on building production-grade AI agents, running from 19 September to 17 October 2026. The official page provides the registration form and program details.",
+    "eventType": "training",
+    "mode": "hybrid",
+    "startAt": "2026-09-19T00:00:00+05:30",
+    "endAt": "2026-10-17T23:59:00+05:30",
+    "venue": "IIT Hyderabad campus and online",
+    "organizer": "Department of Computer Science and Engineering, IIT Hyderabad",
+    "institution": "Indian Institute of Technology Hyderabad",
+    "registrationUrl": "https://forms.gle/M5xy6KNTu1pDz4iF7",
+    "deadlineAt": null,
+    "sourceUrl": "https://ailaunchpad.cse.iith.ac.in/2026/september/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.93,
+    "state": "Telangana",
+    "district": "Sangareddy",
+    "area": "Sangareddy",
+    "tags": [
+      "AI",
+      "certification",
+      "training",
+      "IIT Hyderabad"
+    ],
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+  },
+  {
+    "id": "vjit-sih-2026",
+    "title": "Internal Hackathon — Smart India Hackathon (SIH 2026)",
+    "summary": "An internal hackathon for VJIT student innovators on 10–11 September 2026, organized by the Department of Information Technology at VJIT.",
+    "eventType": "hackathon",
+    "mode": "offline",
+    "startAt": "2026-09-10T00:00:00+05:30",
+    "endAt": "2026-09-11T23:59:00+05:30",
+    "venue": "Vidya Jyothi Institute of Technology, Hyderabad, Telangana",
+    "organizer": "Department of Information Technology, Vidya Jyothi Institute of Technology",
+    "institution": "Vidya Jyothi Institute of Technology",
+    "registrationUrl": "https://shorturl.at/PJSVG",
+    "deadlineAt": null,
+    "sourceUrl": "https://vjit.edu.in/internal-hackathon-smart-india-hackathon-sih-2026/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.96,
+    "state": "Telangana",
+    "district": "Hyderabad",
+    "area": "Hyderabad",
+    "tags": [
+      "hackathon",
+      "SIH 2026",
+      "VJIT"
+    ],
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
   }
 ]
