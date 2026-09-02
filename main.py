@@ -53,6 +53,82 @@ def normalize_users(raw: Any) -> dict[str, dict[str, Any]]:
             normalized[email] = user
     return normalized
 
+MONGO_URI = os.getenv("MONGODB_URI", "").strip()
+MONGO_DB_NAME = os.getenv("MONGODB_DB", "opportunity_atlas").strip() or "opportunity_atlas"
+_MONGO_CLIENT: Any = None
+_MONGO_UNAVAILABLE = False
+_MONGO_LOCK = threading.Lock()
+
+def mongo_collection(name: str) -> Any:
+    """Return a reachable MongoDB collection, or None for the JSON fallback."""
+    global _MONGO_CLIENT, _MONGO_UNAVAILABLE
+    if _MONGO_UNAVAILABLE or not MONGO_URI:
+        return None
+    try:
+        from pymongo import MongoClient
+        with _MONGO_LOCK:
+            if _MONGO_CLIENT is None:
+                client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000, connectTimeoutMS=3000)
+                client.admin.command("ping")
+                _MONGO_CLIENT = client
+        collection = _MONGO_CLIENT[MONGO_DB_NAME][name]
+        collection.create_index("_id", unique=True)
+        return collection
+    except Exception:
+        _MONGO_UNAVAILABLE = True
+        return None
+
+def read_users() -> dict[str, dict[str, Any]]:
+    collection = mongo_collection("users")
+    if collection is not None:
+        try:
+            docs = list(collection.find({}))
+            users = {str(doc["_id"]): {k: v for k, v in doc.items() if k != "_id"} for doc in docs if doc.get("_id")}
+            return normalize_users(users)
+        except Exception:
+            pass
+    return normalize_users(read_json(USERS_FILE, {}))
+
+def write_users(users: dict[str, dict[str, Any]]) -> None:
+    collection = mongo_collection("users")
+    if collection is not None:
+        try:
+            for email, user in users.items():
+                collection.replace_one({"_id": email}, {"_id": email, **user}, upsert=True)
+            if users:
+                collection.delete_many({"_id": {"$nin": list(users)}})
+            else:
+                collection.delete_many({})
+            return
+        except Exception:
+            pass
+    write_json(USERS_FILE, users)
+
+def read_saved() -> dict[str, list[str]]:
+    collection = mongo_collection("saved")
+    if collection is not None:
+        try:
+            return {str(doc["_id"]): list(doc.get("event_ids") or []) for doc in collection.find({}) if doc.get("_id")}
+        except Exception:
+            pass
+    raw = read_json(SAVED_FILE, {})
+    return raw if isinstance(raw, dict) else {}
+
+def write_saved(saved: dict[str, list[str]]) -> None:
+    collection = mongo_collection("saved")
+    if collection is not None:
+        try:
+            for email, event_ids in saved.items():
+                collection.replace_one({"_id": email}, {"_id": email, "event_ids": list(dict.fromkeys(event_ids))}, upsert=True)
+            if saved:
+                collection.delete_many({"_id": {"$nin": list(saved)}})
+            else:
+                collection.delete_many({})
+            return
+        except Exception:
+            pass
+    write_json(SAVED_FILE, saved)
+
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
 configured_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 origins = ["*"] if "*" in configured_origins else list(dict.fromkeys(configured_origins + ["https://eod-warangal.vercel.app", "https://engineering-opportunities-dashboard.vercel.app"]))
@@ -132,7 +208,7 @@ def public_user(user: dict[str, Any]) -> dict[str, Any]:
 
 def current_user(authorization: str | None = Header(default=None)) -> dict[str, Any]:
     email = email_from_token(authorization)
-    users = normalize_users(read_json(USERS_FILE, {}))
+    users = read_users()
     user = users.get(email)
     if not user: raise HTTPException(status_code=401, detail="Account not found")
     return user
@@ -153,17 +229,17 @@ def register(payload: RegisterCredentials) -> dict[str, Any]:
     if len(payload.password) < 8: raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
     if not re.fullmatch(r"\d{4,12}", pin): raise HTTPException(status_code=422, detail="Screen lock / recovery PIN must be 4–12 digits")
     with LOCK:
-        users = normalize_users(read_json(USERS_FILE, {}))
+        users = read_users()
         if email in users: raise HTTPException(status_code=409, detail="An account with this email already exists")
         users[email] = {"email":email, "name":payload.name.strip(), "password_hash":bcrypt.hashpw(payload.password.encode(), bcrypt.gensalt()).decode(), "recovery_pin_hash":bcrypt.hashpw(pin.encode(), bcrypt.gensalt()).decode(), "created_at":datetime.now(timezone.utc).isoformat()}
-        write_json(USERS_FILE, users)
+        write_users(users)
     user = users[email]
     return {"token":token_for(email), "user":public_user(user)}
 
 @app.post("/api/auth/login")
 def login(payload: Credentials) -> dict[str, Any]:
     email = normalize_email(payload.email)
-    users = normalize_users(read_json(USERS_FILE, {}))
+    users = read_users()
     user = users.get(email)
     stored_hash = str(user.get("password_hash") or "") if user else ""
     try:
@@ -178,12 +254,12 @@ def login(payload: Credentials) -> dict[str, Any]:
 
 @app.post("/api/auth/reset")
 def reset_password(payload: PasswordReset) -> dict[str, Any]:
-    email = payload.email.strip().lower()
+    email = normalize_email(payload.email)
     pin = payload.recovery_pin.strip()
     if not EMAIL_RE.fullmatch(email) or not re.fullmatch(r"\d{4,12}", pin):
         raise HTTPException(status_code=401, detail="Email or recovery PIN is incorrect")
     with LOCK:
-        users = read_json(USERS_FILE, {})
+        users = read_users()
         user = users.get(email)
         pin_hash = user.get("recovery_pin_hash") if user else None
         if not user or not pin_hash or not bcrypt.checkpw(pin.encode(), pin_hash.encode()):
@@ -191,7 +267,7 @@ def reset_password(payload: PasswordReset) -> dict[str, Any]:
         user["password_hash"] = bcrypt.hashpw(payload.new_password.encode(), bcrypt.gensalt()).decode()
         user["password_changed_at"] = datetime.now(timezone.utc).isoformat()
         users[email] = user
-        write_json(USERS_FILE, users)
+        write_users(users)
     return {"token":token_for(email), "user":public_user(user)}
 
 @app.get("/api/auth/me")
@@ -208,7 +284,7 @@ def events(area: str | None = None, college: str | None = None, branch: str | No
 
 @app.get("/api/me/saved")
 def get_saved(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
-    all_saved = read_json(SAVED_FILE, {})
+    all_saved = read_saved()
     return {"event_ids": all_saved.get(user["email"], [])}
 
 @app.post("/api/me/saved")
@@ -216,20 +292,20 @@ def save_opportunity(payload: SavedRequest, user: dict[str, Any] = Depends(curre
     valid_ids = {e["id"] for e in load_events()}
     if payload.event_id not in valid_ids: raise HTTPException(status_code=404, detail="Opportunity not found")
     with LOCK:
-        all_saved = read_json(SAVED_FILE, {})
+        all_saved = read_saved()
         saved = list(dict.fromkeys(all_saved.get(user["email"], [])))
         if payload.event_id not in saved: saved.append(payload.event_id)
         all_saved[user["email"]] = saved
-        write_json(SAVED_FILE, all_saved)
+        write_saved(all_saved)
     return {"event_ids":saved}
 
 @app.delete("/api/me/saved/{event_id}")
 def remove_saved(event_id: str, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
     with LOCK:
-        all_saved = read_json(SAVED_FILE, {})
+        all_saved = read_saved()
         saved = [x for x in all_saved.get(user["email"], []) if x != event_id]
         all_saved[user["email"]] = saved
-        write_json(SAVED_FILE, all_saved)
+        write_saved(all_saved)
     return {"event_ids":saved}
 
 @app.get("/")
