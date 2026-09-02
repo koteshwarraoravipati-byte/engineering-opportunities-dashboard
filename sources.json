@@ -262,8 +262,180 @@
       "approved": true,
       "collectionStatus": "discovery_only",
       "notes": "Official notifications, events, internships and placement pages only."
+    },
+    {
+      "id": "iiith-main",
+      "name": "International Institute of Information Technology Hyderabad",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://www.iiit.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notices, events, careers and research opportunity pages only."
+    },
+    {
+      "id": "cbit-main",
+      "name": "Chaitanya Bharathi Institute of Technology",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://www.cbit.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, notices, internships and placement pages only."
+    },
+    {
+      "id": "hitam-main",
+      "name": "Hyderabad Institute of Technology and Management",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://hitam.org/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, notices, internships and placement pages only."
+    },
+    {
+      "id": "mgit-main",
+      "name": "Mahatma Gandhi Institute of Technology",
+      "type": "official_college",
+      "district": "Rangareddy",
+      "homepage": "https://mgit.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, circulars, internships and placement pages only."
+    },
+    {
+      "id": "vnrvjiet-main",
+      "name": "VNR Vignana Jyothi Institute of Engineering and Technology",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://www.vnrvjiet.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official careers, notices, events, internships and placement pages only."
+    },
+    {
+      "id": "snist-main",
+      "name": "Sreenidhi Institute of Science and Technology",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://sreenidhi.edu.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notifications, events, internships and placement pages only."
+    },
+    {
+      "id": "anurag-main",
+      "name": "Anurag University",
+      "type": "official_university",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://anurag.edu.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official news, events, internships and placement pages only."
+    },
+    {
+      "id": "rgukt-basar",
+      "name": "Rajiv Gandhi University of Knowledge Technologies, Basar",
+      "type": "official_university",
+      "district": "Nirmal",
+      "homepage": "https://rgukt.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official careers, notices, events and academic opportunity pages only."
+    },
+    {
+      "id": "jits-jayamukhi",
+      "name": "Jayamukhi Institute of Technological Sciences",
+      "type": "official_college",
+      "district": "Warangal",
+      "homepage": "https://www.jits.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official news, events, internships and placement pages only."
+    },
+    {
+      "id": "aurora-main",
+      "name": "Aurora Group of Institutions",
+      "type": "official_college",
+      "district": null,
+      "homepage": "https://www.aurora.in/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Official domain reachable, but the supplied page did not clearly identify a Telangana engineering campus or current engineering opportunity source."
+    },
+    {
+      "id": "gnitc-main",
+      "name": "Guru Nanak Institutions Technical Campus",
+      "type": "official_college",
+      "district": "Rangareddy",
+      "homepage": "https://www.gniindia.org/gnitc/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Validation was blocked by CAPTCHA; do not collect until independently verified."
+    },
+    {
+      "id": "mrcet-main",
+      "name": "Malla Reddy College of Engineering and Technology",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://mrcet.ac.in/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Official-domain validation was inconclusive during this run."
+    },
+    {
+      "id": "cmrcet-main",
+      "name": "CMR College of Engineering and Technology",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://cmrcet.ac.in/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Official-domain validation was inconclusive during this run."
+    },
+    {
+      "id": "ashoka-main",
+      "name": "Ashoka Institute of Engineering and Technology",
+      "type": "official_college",
+      "district": "Nalgonda",
+      "homepage": "https://ashoka.ac.in/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Supplied domain did not resolve during validation; do not collect until independently verified."
+    },
+    {
+      "id": "geethanjali-main",
+      "name": "Geethanjali College of Engineering and Technology",
+      "type": "official_college",
+      "district": "Rangareddy",
+      "homepage": "https://geethanjaliinstitutions.com/engineering/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "HTTPS certificate validation failed; do not collect until a valid official HTTPS page is confirmed."
+    },
+    {
+      "id": "ellenki-main",
+      "name": "Ellenki College of Engineering and Technology",
+      "type": "official_college",
+      "district": "Sangareddy",
+      "homepage": "https://ellenkicet.ac.in/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "HTTPS certificate validation failed; do not collect until a valid official HTTPS page is confirmed."
+    },
+    {
+      "id": "nmrec-main",
+      "name": "Nalla Malla Reddy Engineering College",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://nmrec.edu.in/",
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Domain redirected and full validation was inconclusive; do not collect until independently verified."
     }
   ],
   "coverageNote": "The registry is expandable by district; a college is added only after its official HTTPS domain is verified. Google/search results are discovery aids, never publication evidence.",
-  "verificationRule": "Only entries with approved=true and collectionStatus=discovery_only are collected; all other sources remain blocked."
+  "verificationRule": "Only entries with approved=true and collectionStatus=discovery_only are collected; all other sources remain blocked.",
+  "lastUserExpansionCheck": "2026-09-02",
+  "userSuppliedDomainsNote": "Supplied domains are treated as discovery leads. Only approved=true and collectionStatus=discovery_only sources are collected; blocked entries cannot publish records."
 }
