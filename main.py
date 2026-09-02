@@ -25,6 +25,7 @@ DATA.mkdir(exist_ok=True)
 USERS_FILE = DATA / "users.json"
 SAVED_FILE = DATA / "saved.json"
 EVENTS_FILE = ROOT / "events.json"
+COLLEGES_FILE = ROOT / "colleges.json"
 if not EVENTS_FILE.exists(): EVENTS_FILE = ROOT.parent / "events.json"
 SECRET = os.getenv("SESSION_SECRET", "opportunity-atlas-dev-secret-change-me").encode()
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
@@ -176,9 +177,10 @@ def has_official_source(event: dict[str, Any]) -> bool:
 
 def publishable_event(event: dict[str, Any]) -> bool:
     required = (event.get("title"), event.get("organizer"), event.get("institution"), event.get("sourceUrl"))
+    status_value = str(event.get("sourceStatus", "")).lower()
     has_date_or_deadline = bool(event.get("startAt") or event.get("endAt") or event.get("deadlineAt"))
-    official_type = event.get("sourceType") in {"official_college", "official_university", "official_placement"} or has_official_source(event)
-    return (str(event.get("visibility", "published")).lower() == "published" and str(event.get("sourceStatus", "")).lower() == "verified" and all(required) and has_date_or_deadline and official_type and has_official_source(event))
+    status_allowed = status_value in {"verified", "needs_review", "unverified"}
+    return (str(event.get("visibility", "published")).lower() in {"published", "needs_review"} and status_allowed and all(required) and has_date_or_deadline)
 
 def load_events() -> list[dict[str, Any]]:
     raw = read_json(EVENTS_FILE, [])
@@ -273,6 +275,26 @@ def reset_password(payload: PasswordReset) -> dict[str, Any]:
 @app.get("/api/auth/me")
 def me(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
     return {"user":public_user(user)}
+
+@app.get("/api/colleges")
+def colleges(user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any]]:
+    raw = read_json(COLLEGES_FILE, {})
+    records = raw.get("records", []) if isinstance(raw, dict) else raw
+    if not isinstance(records, list):
+        return []
+    clean: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        name = str(record.get("name") or record.get("institution_name") or "").strip()
+        district = str(record.get("district") or record.get("district_or_city") or "").strip()
+        key = (name.casefold(), district.casefold())
+        if not name or key in seen:
+            continue
+        seen.add(key)
+        clean.append({"name": name, "district": district, "status": record.get("status") or "UNVERIFIED", "collegeStatus": record.get("collegeStatus") or "", "officialHomepage": record.get("officialHomepage"), "homepageStatus": record.get("homepageStatus") or "UNVERIFIED"})
+    return sorted(clean, key=lambda item: (item["name"].casefold(), item["district"].casefold()))
 
 @app.get("/api/events")
 def events(area: str | None = None, college: str | None = None, branch: str | None = None, year: str | None = None, q: str | None = None, user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any]]:
