@@ -232,6 +232,37 @@
       "approved": false,
       "collectionStatus": "blocked_pending_permission",
       "notes": "Google may discover a lead, but third-party-only listings are never published without an official college evidence page."
+    },
+    {
+      "id": "vrec-main",
+      "name": "Vijay Rural Engineering College",
+      "type": "official_college",
+      "district": "Nizamabad",
+      "homepage": "https://vrec.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official news, internship, placement and college notice pages only."
+    },
+    {
+      "id": "vjec-main",
+      "name": "Vijaya Engineering College",
+      "type": "official_college",
+      "district": "Khammam",
+      "homepage": "https://vjeckmm.edu.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notifications, events, internships and placement pages only."
+    },
+    {
+      "id": "jits-main",
+      "name": "Jyothishmathi Institute of Technology and Science",
+      "type": "official_college",
+      "district": "Karimnagar",
+      "homepage": "https://jits.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notifications, events, internships and placement pages only."
     }
-  ]
+  ],
+  "coverageNote": "The registry is expandable by district; a college is added only after its official HTTPS domain is verified. Google/search results are discovery aids, never publication evidence."
 }
