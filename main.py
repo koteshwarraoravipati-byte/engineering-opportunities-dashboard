@@ -232,6 +232,20 @@ def remove_saved(event_id: str, user: dict[str, Any] = Depends(current_user)) ->
         write_json(SAVED_FILE, all_saved)
     return {"event_ids":saved}
 
+@app.post("/api/admin/reset-all-accounts")
+def reset_all_accounts(x_reset_mode: str | None = Header(default=None)) -> dict[str, Any]:
+    reset_key = "CONFIRM_20260902_ACCOUNT_RESET"
+    if os.getenv("ACCOUNT_RESET_MODE") != reset_key or x_reset_mode != reset_key:
+        raise HTTPException(status_code=404, detail="Not found")
+    with LOCK:
+        users = normalize_users(read_json(USERS_FILE, {}))
+        saved = read_json(SAVED_FILE, {})
+        user_count = len(users)
+        saved_count = len(saved) if isinstance(saved, dict) else 0
+        write_json(USERS_FILE, {})
+        write_json(SAVED_FILE, {})
+    return {"status": "reset", "users_removed": user_count, "saved_accounts_removed": saved_count}
+
 @app.get("/")
 def home() -> FileResponse:
     return FileResponse(ROOT / "index.html")
