@@ -289,9 +289,9 @@
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
       "homepage": "https://hitam.org/",
-      "approved": true,
-      "collectionStatus": "discovery_only",
-      "notes": "Official events, notices, internships and placement pages only."
+      "approved": false,
+      "collectionStatus": "blocked_pending_validation",
+      "notes": "Validation redirected without returning verifiable page content; do not collect until independently confirmed."
     },
     {
       "id": "mgit-main",
@@ -388,10 +388,10 @@
       "name": "CMR College of Engineering and Technology",
       "type": "official_college",
       "district": "Medchal-Malkajgiri",
-      "homepage": "https://cmrcet.ac.in/",
+      "homepage": "https://cmrcet.org/index.php",
       "approved": false,
       "collectionStatus": "blocked_pending_validation",
-      "notes": "Official-domain validation was inconclusive during this run."
+      "notes": "Supplied CMRCET domain preserved; official-domain validation was inconclusive during this run."
     },
     {
       "id": "ashoka-main",
