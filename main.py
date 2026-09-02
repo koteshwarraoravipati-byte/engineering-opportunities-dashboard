@@ -25,6 +25,7 @@ DATA.mkdir(exist_ok=True)
 USERS_FILE = DATA / "users.json"
 SAVED_FILE = DATA / "saved.json"
 EVENTS_FILE = ROOT / "events.json"
+if not EVENTS_FILE.exists(): EVENTS_FILE = ROOT.parent / "events.json"
 SECRET = os.getenv("SESSION_SECRET", "opportunity-atlas-dev-secret-change-me").encode()
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
 LOCK = threading.Lock()
@@ -115,7 +116,9 @@ def current_user(authorization: str | None = Header(default=None)) -> dict[str, 
 
 @app.get("/api/health")
 def health() -> dict[str, Any]:
-    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(load_events())}
+    raw = read_json(EVENTS_FILE, [])
+    if isinstance(raw, dict): raw = raw.get("events", [])
+    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(load_events()), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "build":"622a47f"}
 
 @app.post("/api/auth/register", status_code=201)
 def register(payload: RegisterCredentials) -> dict[str, Any]:
