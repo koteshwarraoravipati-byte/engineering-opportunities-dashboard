@@ -1,14 +1,24 @@
 {
-  "scope": "Warangal engineering colleges and universities",
+  "scope": "Engineering colleges and universities across Telangana",
+  "state": "Telangana",
   "refreshCadence": "every_6_hours",
+  "discoveryPolicy": {
+    "googleAllowedAsDiscoveryOnly": true,
+    "officialCollegeWebsiteRequiredForEvidence": true,
+    "thirdPartyOnlyListingsBlocked": true,
+    "autoPublish": false
+  },
   "publicationPolicy": {
     "requiredFields": [
       "title",
       "startAt",
       "organizer",
+      "institution",
       "sourceUrl"
     ],
     "requireOfficialSource": true,
+    "requireConcreteDateOrDeadline": true,
+    "requireSourceStatus": "verified",
     "reviewWhenConfidenceBelow": 0.75,
     "autoExpire": true
   },
@@ -17,15 +27,17 @@
       "id": "nitw-main",
       "name": "National Institute of Technology Warangal",
       "type": "official_college",
+      "district": "Warangal",
       "homepage": "https://www.nitw.ac.in/",
       "approved": true,
       "collectionStatus": "discovery_only",
-      "notes": "Official institute, department, student activity and CCPD pages only."
+      "notes": "Official institute, department, student activity and career pages only."
     },
     {
       "id": "nitw-ccpd",
       "name": "NIT Warangal Centre for Career Planning and Development",
       "type": "official_placement",
+      "district": "Warangal",
       "homepage": "https://nitw.ac.in/ccpd",
       "approved": true,
       "collectionStatus": "discovery_only",
@@ -33,48 +45,193 @@
     },
     {
       "id": "sru-main",
-      "name": "SR University Warangal",
+      "name": "SR University",
       "type": "official_university",
+      "district": "Warangal",
       "homepage": "https://sru.edu.in/announcements",
       "approved": true,
       "collectionStatus": "discovery_only",
-      "notes": "Use official events and announcements pages; include research, workshops, conferences and student activities."
+      "notes": "Official events and announcements only."
     },
     {
       "id": "kitsw-main",
       "name": "Kakatiya Institute of Technology and Science, Warangal",
       "type": "official_college",
+      "district": "Warangal",
       "homepage": "https://kitsw.ac.in/",
       "approved": true,
       "collectionStatus": "discovery_only",
-      "notes": "Check official home, SAC, department, internship and placement pages."
+      "notes": "Official event, notice, internship and placement pages only."
     },
     {
       "id": "vaagdevi-main",
       "name": "Vaagdevi College of Engineering",
       "type": "official_college",
+      "district": "Warangal",
       "homepage": "https://www.vaagdevi.edu.in/",
       "approved": true,
       "collectionStatus": "discovery_only",
-      "notes": "Use official event, notice, workshop, conference, internship and placement pages."
+      "notes": "Official event, notice, workshop, conference, internship and placement pages only."
     },
     {
-      "id": "ku-events",
-      "name": "Kakatiya University, Warangal — Events",
+      "id": "ku-main",
+      "name": "Kakatiya University",
       "type": "official_university",
-      "homepage": "https://kakatiya.ac.in/more/events",
+      "district": "Warangal",
+      "homepage": "https://kakatiya.ac.in/",
       "approved": true,
       "collectionStatus": "discovery_only",
-      "notes": "Publish engineering-relevant events after date and relevance review."
+      "notes": "Engineering-relevant official notices and events only."
     },
     {
-      "id": "external-approved-only",
-      "name": "External platforms",
+      "id": "iith-main",
+      "name": "Indian Institute of Technology Hyderabad",
+      "type": "official_college",
+      "district": "Sangareddy",
+      "homepage": "https://www.iith.ac.in/events/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official IIT Hyderabad events and department opportunity pages only."
+    },
+    {
+      "id": "jntuh-main",
+      "name": "Jawaharlal Nehru Technological University Hyderabad",
+      "type": "official_university",
+      "district": "Hyderabad",
+      "homepage": "https://jntuh.ac.in/conferences",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official university conferences, workshops and notices only."
+    },
+    {
+      "id": "jntuhceh-main",
+      "name": "JNTUH College of Engineering Hyderabad",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://jntuhceh.ac.in/more/events",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official college events and department notices only."
+    },
+    {
+      "id": "vjit-main",
+      "name": "Vidya Jyothi Institute of Technology",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://vjit.edu.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, hackathons, internships and placement pages only."
+    },
+    {
+      "id": "iare-main",
+      "name": "Institute of Aeronautical Engineering",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://www.iare.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official internship, events and placement pages only."
+    },
+    {
+      "id": "cmrec-main",
+      "name": "CMR Engineering College",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://cmrec.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, internships and placement pages only."
+    },
+    {
+      "id": "nrcmec-main",
+      "name": "Narsimha Reddy Engineering College",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://www.nrcmec.org/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official workshops, seminars and events only."
+    },
+    {
+      "id": "biet-main",
+      "name": "Bharat Institute of Engineering and Technology",
+      "type": "official_college",
+      "district": "Rangareddy",
+      "homepage": "https://biet.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, internships and placement pages only."
+    },
+    {
+      "id": "vbit-main",
+      "name": "Vignana Bharathi Institute of Technology",
+      "type": "official_college",
+      "district": "Medchal-Malkajgiri",
+      "homepage": "https://vbithyd.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official campus events, hackathons and opportunities only."
+    },
+    {
+      "id": "cvr-main",
+      "name": "CVR College of Engineering",
+      "type": "official_college",
+      "district": "Rangareddy",
+      "homepage": "https://cvr.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official college announcements and events only."
+    },
+    {
+      "id": "kmit-main",
+      "name": "Keshav Memorial Institute of Technology",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://kmit.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official news, events, internships and placements only."
+    },
+    {
+      "id": "kgr-main",
+      "name": "KG Reddy College of Engineering and Technology",
+      "type": "official_college",
+      "district": "Rangareddy",
+      "homepage": "https://kgr.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official college events and career opportunities only."
+    },
+    {
+      "id": "lords-main",
+      "name": "Lords Institute of Engineering and Technology",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://www.lords.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official events, internships and placement pages only."
+    },
+    {
+      "id": "pallavi-main",
+      "name": "Pallavi Engineering College",
+      "type": "official_college",
+      "district": "Hyderabad",
+      "homepage": "https://pallaviengineeringcollege.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official notifications and event pages only."
+    },
+    {
+      "id": "external-blocked",
+      "name": "Third-party platforms",
       "type": "external_platform",
+      "district": null,
       "homepage": "",
       "approved": false,
       "collectionStatus": "blocked_pending_permission",
-      "notes": "Do not scrape or publish third-party listings without documented permission or API access."
+      "notes": "Google may discover a lead, but third-party-only listings are never published without an official college evidence page."
     }
   ]
 }
