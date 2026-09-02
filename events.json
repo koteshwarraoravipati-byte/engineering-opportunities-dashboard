@@ -310,5 +310,63 @@
       "VJIT"
     ],
     "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+  },
+  {
+    "id": "mgit-prompt-engineering-2026",
+    "title": "AICTE-VAANI Sponsored 3-Day Workshop on Mastering Prompt Engineering for Generative AI",
+    "summary": "A three-day AICTE-VAANI sponsored workshop at Mahatma Gandhi Institute of Technology focused on prompt engineering for generative AI.",
+    "eventType": "workshop",
+    "mode": "offline",
+    "startAt": "2026-09-09T00:00:00+05:30",
+    "endAt": "2026-09-11T23:59:00+05:30",
+    "venue": "Mahatma Gandhi Institute of Technology, Hyderabad, Telangana",
+    "organizer": "Mahatma Gandhi Institute of Technology",
+    "institution": "Mahatma Gandhi Institute of Technology",
+    "registrationUrl": "https://mgit.ac.in/events/aicte-vaani-sponsored-3-day-workshop-on-mastering-prompt-engineering-for-generative-ai/",
+    "deadlineAt": null,
+    "sourceUrl": "https://mgit.ac.in/events/aicte-vaani-sponsored-3-day-workshop-on-mastering-prompt-engineering-for-generative-ai/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.96,
+    "state": "Telangana",
+    "district": "Rangareddy",
+    "area": "Rangareddy",
+    "tags": [
+      "AI",
+      "prompt engineering",
+      "generative AI",
+      "workshop",
+      "MGIT"
+    ],
+    "lastCheckedAt": "2026-09-02T14:47:00+05:30"
+  },
+  {
+    "id": "mgit-sih-2026",
+    "title": "MGIT Internal Hackathon — Smart India Hackathon (SIH 2026)",
+    "summary": "An internal Smart India Hackathon event organized by Mahatma Gandhi Institute of Technology on 12 September 2026.",
+    "eventType": "hackathon",
+    "mode": "offline",
+    "startAt": "2026-09-12T00:00:00+05:30",
+    "endAt": "2026-09-12T23:59:00+05:30",
+    "venue": "Mahatma Gandhi Institute of Technology, Hyderabad, Telangana",
+    "organizer": "Mahatma Gandhi Institute of Technology",
+    "institution": "Mahatma Gandhi Institute of Technology",
+    "registrationUrl": "https://mgit.ac.in/events/mgit-internal-hackathon-smart-india-hackathon-sih-2026/",
+    "deadlineAt": null,
+    "sourceUrl": "https://mgit.ac.in/events/mgit-internal-hackathon-smart-india-hackathon-sih-2026/",
+    "sourceType": "official_college",
+    "sourceStatus": "verified",
+    "visibility": "published",
+    "confidence": 0.96,
+    "state": "Telangana",
+    "district": "Rangareddy",
+    "area": "Rangareddy",
+    "tags": [
+      "hackathon",
+      "SIH 2026",
+      "MGIT"
+    ],
+    "lastCheckedAt": "2026-09-02T14:47:00+05:30"
   }
 ]
