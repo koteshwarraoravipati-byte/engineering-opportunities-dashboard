@@ -186,7 +186,7 @@ def load_events() -> list[dict[str, Any]]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
-    return [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() == "telangana"]
+    return [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() in {"telangana", "andhra pradesh"}]
 
 def token_for(email: str) -> str:
     payload = base64.urlsafe_b64encode(json.dumps({"email": email, "exp": int(datetime.now(timezone.utc).timestamp()) + 60 * 60 * 24 * 7}, separators=(",", ":")).encode()).decode().rstrip("=")
@@ -220,7 +220,7 @@ def health() -> dict[str, Any]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
-    published = [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() == "telangana"]
+    published = [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() in {"telangana", "andhra pradesh"}]
     return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
 
 @app.post("/api/auth/register", status_code=201)
@@ -293,15 +293,15 @@ def colleges(user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any
         if not name or key in seen:
             continue
         seen.add(key)
-        clean.append({"name": name, "district": district, "status": record.get("status") or "UNVERIFIED", "collegeStatus": record.get("collegeStatus") or "", "officialHomepage": record.get("officialHomepage"), "homepageStatus": record.get("homepageStatus") or "UNVERIFIED"})
+        clean.append({"name": name, "district": district, "state": record.get("state") or ("Andhra Pradesh" if district.casefold().startswith("andhra pradesh") else "Telangana"), "status": record.get("status") or "UNVERIFIED", "collegeStatus": record.get("collegeStatus") or "", "officialHomepage": record.get("officialHomepage"), "homepageStatus": record.get("homepageStatus") or "UNVERIFIED"})
     return sorted(clean, key=lambda item: (item["name"].casefold(), item["district"].casefold()))
 
 @app.get("/api/events")
-def events(area: str | None = None, college: str | None = None, branch: str | None = None, year: str | None = None, q: str | None = None, user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any]]:
+def events(state: str | None = None, area: str | None = None, college: str | None = None, branch: str | None = None, year: str | None = None, q: str | None = None, user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any]]:
     values = load_events()
     def matches(e: dict[str, Any]) -> bool:
         text = json.dumps(e).lower()
-        return (not area or area.lower() in text) and (not college or college.lower() in text) and (not branch or branch.lower() in text) and (not year or year.lower() in text) and (not q or q.lower() in text)
+        return (not state or state.lower() in str(e.get("state", "")).lower()) and (not area or area.lower() in text) and (not college or college.lower() in text) and (not branch or branch.lower() in text) and (not year or year.lower() in text) and (not q or q.lower() in text)
     return [e for e in values if matches(e)]
 
 @app.get("/api/me/saved")
