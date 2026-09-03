@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
 import hashlib
@@ -221,7 +221,7 @@ def health() -> dict[str, Any]:
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
     published = [e for e in items if publishable_event(e) and str(e.get("state", "Telangana")).lower() == "telangana"]
-    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "build":"e39076a"}
+    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
 
 @app.post("/api/auth/register", status_code=201)
 def register(payload: RegisterCredentials) -> dict[str, Any]:
@@ -229,7 +229,7 @@ def register(payload: RegisterCredentials) -> dict[str, Any]:
     pin = payload.recovery_pin.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(status_code=422, detail="Use a valid Gmail address")
     if len(payload.password) < 8: raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
-    if not re.fullmatch(r"\d{4,12}", pin): raise HTTPException(status_code=422, detail="Screen lock / recovery PIN must be 4–12 digits")
+    if not re.fullmatch(r"\d{4,12}", pin): raise HTTPException(status_code=422, detail="Screen lock / recovery PIN must be 4â€“12 digits")
     with LOCK:
         users = read_users()
         if email in users: raise HTTPException(status_code=409, detail="An account with this email already exists")
@@ -333,3 +333,4 @@ def remove_saved(event_id: str, user: dict[str, Any] = Depends(current_user)) ->
 @app.get("/")
 def home() -> FileResponse:
     return FileResponse(ROOT / "index.html")
+
