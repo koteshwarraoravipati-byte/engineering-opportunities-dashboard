@@ -165,26 +165,6 @@ def write_saved(saved: dict[str, list[str]]) -> None:
             collection.delete_many({})
     mongo_call("saved", operation)
 
-
-    try:
-        if not MONGO_URI:
-            write_json(USERS_FILE, {})
-            write_json(SAVED_FILE, {})
-            return
-        from pymongo import MongoClient
-        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000, connectTimeoutMS=5000)
-        database = client[MONGO_DB_NAME]
-        maintenance = database["maintenance"]
-        if not maintenance.find_one({"_id": ACCOUNT_RESET_MARKER}):
-            database["users"].delete_many({})
-            database["saved"].delete_many({})
-            maintenance.insert_one({"_id": ACCOUNT_RESET_MARKER, "created_at": datetime.now(timezone.utc).isoformat()})
-        client.close()
-    except Exception:
-        # Do not prevent the service from starting; the verification step below will catch a failed cleanup.
-        pass
-
-reset_accounts_once()
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
 
 @app.exception_handler(StorageUnavailableError)
