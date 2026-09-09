@@ -166,9 +166,6 @@ def write_saved(saved: dict[str, list[str]]) -> None:
     mongo_call("saved", operation)
 
 
-# ONE-TIME ACCOUNT CLEANUP: remove all user accounts and saved-account data, then record a durable marker.
-ACCOUNT_RESET_MARKER = "account-reset-20260909"
-def reset_accounts_once() -> None:
     try:
         if not MONGO_URI:
             write_json(USERS_FILE, {})
