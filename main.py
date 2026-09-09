@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import base64
 import hashlib
@@ -16,7 +16,7 @@ from typing import Any
 import bcrypt
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parent
@@ -35,6 +35,27 @@ LOCK = threading.Lock()
 def normalize_email(value: str) -> str:
     """Return one stable key for the same Gmail address across all auth paths."""
     return str(value or "").translate(EMAIL_STRIP_CHARS).strip().casefold()
+
+DISTRICT_ALIASES = {
+    "adilabad": "Adilabad", "bhadradri kothagudem": "Bhadradri Kothagudem",
+    "hanamkonda/warangal": "Hanamkonda / Warangal", "hyderabad": "Hyderabad",
+    "jagtial": "Jagtial", "jangaon": "Jangaon", "kamareddy": "Kamareddy",
+    "karimnagar": "Karimnagar", "khammam": "Khammam", "khammam (palair)": "Khammam (Palair)",
+    "mahaboobnagar": "Mahaboobnagar", "mahbubabad": "Mahbubabad", "mahabubnagar": "Mahabubnagar",
+    "medak": "Medak", "medchal": "Medchal", "medchal-malkajgiri": "Medchal-Malkajgiri",
+    "nalgonda": "Nalgonda", "nirmal": "Nirmal", "nizamabad": "Nizamabad",
+    "peddapalli": "Peddapalli", "ranga reddy": "Ranga Reddy", "sangareddy": "Sangareddy",
+    "sangareddy (sadasivpet)": "Sangareddy (Sadasivpet)", "siddipet": "Siddipet", "suryapet": "Suryapet",
+    "wanaparthy": "Wanaparthy", "warangal": "Warangal", "warangal (rural)": "Warangal (Rural)",
+    "warangal (urban)": "Warangal (Urban)", "warangal/hanamkonda": "Warangal / Hanamkonda",
+    "yadadri bhuvanagiri": "Yadadri Bhuvanagiri"
+}
+
+def normalize_district(value: Any) -> str:
+    cleaned = re.sub(r"\s+", " ", str(value or "").replace("–", "-").replace("—", "-")).strip()
+    if not cleaned:
+        return ""
+    return DISTRICT_ALIASES.get(cleaned.casefold(), cleaned)
 
 def normalize_users(raw: Any) -> dict[str, dict[str, Any]]:
     """Migrate legacy keys and discard malformed records before auth lookups."""
@@ -57,80 +78,83 @@ def normalize_users(raw: Any) -> dict[str, dict[str, Any]]:
 MONGO_URI = os.getenv("MONGODB_URI", "").strip()
 MONGO_DB_NAME = os.getenv("MONGODB_DB", "opportunity_atlas").strip() or "opportunity_atlas"
 _MONGO_CLIENT: Any = None
-_MONGO_UNAVAILABLE = False
 _MONGO_LOCK = threading.Lock()
 
+class StorageUnavailableError(RuntimeError):
+    pass
+
 def mongo_collection(name: str) -> Any:
-    """Return a reachable MongoDB collection, or None for the JSON fallback."""
-    global _MONGO_CLIENT, _MONGO_UNAVAILABLE
-    if _MONGO_UNAVAILABLE or not MONGO_URI:
+    """Return the configured persistent collection, or None only when MongoDB is not configured."""
+    global _MONGO_CLIENT
+    if not MONGO_URI:
         return None
     try:
         from pymongo import MongoClient
         with _MONGO_LOCK:
             if _MONGO_CLIENT is None:
-                client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000, connectTimeoutMS=3000)
-                client.admin.command("ping")
-                _MONGO_CLIENT = client
-        collection = _MONGO_CLIENT[MONGO_DB_NAME][name]
-        collection.create_index("_id", unique=True)
-        return collection
-    except Exception:
-        _MONGO_UNAVAILABLE = True
-        return None
+                _MONGO_CLIENT = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000, connectTimeoutMS=3000)
+            _MONGO_CLIENT.admin.command("ping")
+        return _MONGO_CLIENT[MONGO_DB_NAME][name]
+    except Exception as exc:
+        _MONGO_CLIENT = None
+        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
 
 def read_users() -> dict[str, dict[str, Any]]:
     collection = mongo_collection("users")
-    if collection is not None:
-        try:
-            docs = list(collection.find({}))
-            users = {str(doc["_id"]): {k: v for k, v in doc.items() if k != "_id"} for doc in docs if doc.get("_id")}
-            return normalize_users(users)
-        except Exception:
-            pass
-    return normalize_users(read_json(USERS_FILE, {}))
+    if collection is None:
+        return normalize_users(read_json(USERS_FILE, {}))
+    try:
+        docs = list(collection.find({}))
+    except Exception as exc:
+        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
+    users = {str(doc["_id"]): {k: v for k, v in doc.items() if k != "_id"} for doc in docs if doc.get("_id")}
+    return normalize_users(users)
 
 def write_users(users: dict[str, dict[str, Any]]) -> None:
     collection = mongo_collection("users")
-    if collection is not None:
-        try:
-            for email, user in users.items():
-                collection.replace_one({"_id": email}, {"_id": email, **user}, upsert=True)
-            if users:
-                collection.delete_many({"_id": {"$nin": list(users)}})
-            else:
-                collection.delete_many({})
-            return
-        except Exception:
-            pass
-    write_json(USERS_FILE, users)
+    if collection is None:
+        write_json(USERS_FILE, users)
+        return
+    try:
+        for email, user in users.items():
+            collection.replace_one({"_id": email}, {"_id": email, **user}, upsert=True)
+        if users:
+            collection.delete_many({"_id": {"$nin": list(users)}})
+        else:
+            collection.delete_many({})
+    except Exception as exc:
+        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
 
 def read_saved() -> dict[str, list[str]]:
     collection = mongo_collection("saved")
-    if collection is not None:
-        try:
-            return {str(doc["_id"]): list(doc.get("event_ids") or []) for doc in collection.find({}) if doc.get("_id")}
-        except Exception:
-            pass
-    raw = read_json(SAVED_FILE, {})
-    return raw if isinstance(raw, dict) else {}
+    if collection is None:
+        raw = read_json(SAVED_FILE, {})
+        return raw if isinstance(raw, dict) else {}
+    try:
+        return {str(doc["_id"]): list(doc.get("event_ids") or []) for doc in collection.find({}) if doc.get("_id")}
+    except Exception as exc:
+        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
 
 def write_saved(saved: dict[str, list[str]]) -> None:
     collection = mongo_collection("saved")
-    if collection is not None:
-        try:
-            for email, event_ids in saved.items():
-                collection.replace_one({"_id": email}, {"_id": email, "event_ids": list(dict.fromkeys(event_ids))}, upsert=True)
-            if saved:
-                collection.delete_many({"_id": {"$nin": list(saved)}})
-            else:
-                collection.delete_many({})
-            return
-        except Exception:
-            pass
-    write_json(SAVED_FILE, saved)
+    if collection is None:
+        write_json(SAVED_FILE, saved)
+        return
+    try:
+        for email, event_ids in saved.items():
+            collection.replace_one({"_id": email}, {"_id": email, "event_ids": list(dict.fromkeys(event_ids))}, upsert=True)
+        if saved:
+            collection.delete_many({"_id": {"$nin": list(saved)}})
+        else:
+            collection.delete_many({})
+    except Exception as exc:
+        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
 
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
+
+@app.exception_handler(StorageUnavailableError)
+async def storage_unavailable_handler(request, exc):
+    return JSONResponse(status_code=503, content={"detail": str(exc)})
 configured_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 origins = ["*"] if "*" in configured_origins else list(dict.fromkeys(configured_origins + ["https://eod-warangal.vercel.app", "https://engineering-opportunities-dashboard.vercel.app"]))
 app.add_middleware(CORSMiddleware, allow_origins=origins if origins else ["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
@@ -288,7 +312,7 @@ def colleges(user: dict[str, Any] = Depends(current_user)) -> list[dict[str, Any
         if not isinstance(record, dict):
             continue
         name = str(record.get("name") or record.get("institution_name") or "").strip()
-        district = str(record.get("district") or record.get("district_or_city") or "").strip()
+        district = normalize_district(record.get("district") or record.get("district_or_city") or "")
         key = (name.casefold(), district.casefold())
         if not name or key in seen:
             continue
