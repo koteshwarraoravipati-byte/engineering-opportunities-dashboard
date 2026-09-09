@@ -58,18 +58,6 @@ def normalize_district(value: Any) -> str:
         return ""
     return DISTRICT_ALIASES.get(cleaned.casefold(), cleaned)
 
-def verify_secret(value: str, stored_hash: Any) -> bool:
-    """Verify current bcrypt hashes and safely handle legacy serialized byte hashes."""
-    candidate = str(stored_hash or "").strip()
-    if candidate.startswith("b'") and candidate.endswith("'"):
-        candidate = candidate[2:-1]
-    elif candidate.startswith('b\"') and candidate.endswith('\"'):
-        candidate = candidate[2:-1]
-    try:
-        return bool(candidate and bcrypt.checkpw(value.encode(), candidate.encode()))
-    except (ValueError, TypeError):
-        return False
-
 def normalize_users(raw: Any) -> dict[str, dict[str, Any]]:
     """Migrate legacy keys and discard malformed records before auth lookups."""
     if not isinstance(raw, dict):
@@ -177,6 +165,29 @@ def write_saved(saved: dict[str, list[str]]) -> None:
             collection.delete_many({})
     mongo_call("saved", operation)
 
+
+# ONE-TIME ACCOUNT CLEANUP: remove all user accounts and saved-account data, then record a durable marker.
+ACCOUNT_RESET_MARKER = "account-reset-20260909"
+def reset_accounts_once() -> None:
+    try:
+        if not MONGO_URI:
+            write_json(USERS_FILE, {})
+            write_json(SAVED_FILE, {})
+            return
+        from pymongo import MongoClient
+        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000, connectTimeoutMS=5000)
+        database = client[MONGO_DB_NAME]
+        maintenance = database["maintenance"]
+        if not maintenance.find_one({"_id": ACCOUNT_RESET_MARKER}):
+            database["users"].delete_many({})
+            database["saved"].delete_many({})
+            maintenance.insert_one({"_id": ACCOUNT_RESET_MARKER, "created_at": datetime.now(timezone.utc).isoformat()})
+        client.close()
+    except Exception:
+        # Do not prevent the service from starting; the verification step below will catch a failed cleanup.
+        pass
+
+reset_accounts_once()
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
 
 @app.exception_handler(StorageUnavailableError)
@@ -295,7 +306,10 @@ def login(payload: Credentials) -> dict[str, Any]:
     users = read_users()
     user = users.get(email)
     stored_hash = str(user.get("password_hash") or "") if user else ""
-    valid_password = bool(user and verify_secret(payload.password, stored_hash))
+    try:
+        valid_password = bool(user and stored_hash and bcrypt.checkpw(payload.password.encode(), stored_hash.encode()))
+    except (ValueError, TypeError):
+        valid_password = False
     if not user:
         raise HTTPException(status_code=401, detail="Account not found. Please create a new account.")
     if not valid_password:
@@ -312,7 +326,7 @@ def reset_password(payload: PasswordReset) -> dict[str, Any]:
         users = read_users()
         user = users.get(email)
         pin_hash = user.get("recovery_pin_hash") if user else None
-        if not user or not verify_secret(pin, pin_hash):
+        if not user or not pin_hash or not bcrypt.checkpw(pin.encode(), pin_hash.encode()):
             raise HTTPException(status_code=401, detail="Email or recovery PIN is incorrect")
         user["password_hash"] = bcrypt.hashpw(payload.new_password.encode(), bcrypt.gensalt()).decode()
         user["password_changed_at"] = datetime.now(timezone.utc).isoformat()
