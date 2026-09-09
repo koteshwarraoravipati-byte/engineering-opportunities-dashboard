@@ -8,6 +8,7 @@ import os
 import re
 import secrets
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
@@ -88,67 +89,81 @@ def mongo_collection(name: str) -> Any:
     global _MONGO_CLIENT
     if not MONGO_URI:
         return None
-    try:
-        from pymongo import MongoClient
-        with _MONGO_LOCK:
-            if _MONGO_CLIENT is None:
-                _MONGO_CLIENT = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000, connectTimeoutMS=3000)
-            _MONGO_CLIENT.admin.command("ping")
-        return _MONGO_CLIENT[MONGO_DB_NAME][name]
-    except Exception as exc:
-        _MONGO_CLIENT = None
-        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            from pymongo import MongoClient
+            with _MONGO_LOCK:
+                if _MONGO_CLIENT is None:
+                    _MONGO_CLIENT = MongoClient(MONGO_URI, serverSelectionTimeoutMS=4000, connectTimeoutMS=4000)
+                client = _MONGO_CLIENT
+            client.admin.command("ping")
+            return client[MONGO_DB_NAME][name]
+        except Exception as exc:
+            last_error = exc
+            with _MONGO_LOCK:
+                _MONGO_CLIENT = None
+            if attempt < 2:
+                time.sleep(0.25 * (attempt + 1))
+    raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from last_error
+
+def mongo_call(name: str, operation):
+    """Run one MongoDB operation with reconnect/retry for transient Atlas network failures."""
+    global _MONGO_CLIENT
+    if not MONGO_URI:
+        return None
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            collection = mongo_collection(name)
+            return operation(collection)
+        except Exception as exc:
+            last_error = exc
+            with _MONGO_LOCK:
+                _MONGO_CLIENT = None
+            if attempt < 2:
+                time.sleep(0.25 * (attempt + 1))
+    raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from last_error
 
 def read_users() -> dict[str, dict[str, Any]]:
-    collection = mongo_collection("users")
-    if collection is None:
+    if not MONGO_URI:
         return normalize_users(read_json(USERS_FILE, {}))
-    try:
-        docs = list(collection.find({}))
-    except Exception as exc:
-        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
+    docs = mongo_call("users", lambda collection: list(collection.find({})))
     users = {str(doc["_id"]): {k: v for k, v in doc.items() if k != "_id"} for doc in docs if doc.get("_id")}
     return normalize_users(users)
 
 def write_users(users: dict[str, dict[str, Any]]) -> None:
-    collection = mongo_collection("users")
-    if collection is None:
+    if not MONGO_URI:
         write_json(USERS_FILE, users)
         return
-    try:
+    def operation(collection):
         for email, user in users.items():
             collection.replace_one({"_id": email}, {"_id": email, **user}, upsert=True)
         if users:
             collection.delete_many({"_id": {"$nin": list(users)}})
         else:
             collection.delete_many({})
-    except Exception as exc:
-        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
+    mongo_call("users", operation)
 
 def read_saved() -> dict[str, list[str]]:
-    collection = mongo_collection("saved")
-    if collection is None:
+    if not MONGO_URI:
         raw = read_json(SAVED_FILE, {})
         return raw if isinstance(raw, dict) else {}
-    try:
-        return {str(doc["_id"]): list(doc.get("event_ids") or []) for doc in collection.find({}) if doc.get("_id")}
-    except Exception as exc:
-        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
+    docs = mongo_call("saved", lambda collection: list(collection.find({})))
+    return {str(doc["_id"]): list(doc.get("event_ids") or []) for doc in docs if doc.get("_id")}
 
 def write_saved(saved: dict[str, list[str]]) -> None:
-    collection = mongo_collection("saved")
-    if collection is None:
+    if not MONGO_URI:
         write_json(SAVED_FILE, saved)
         return
-    try:
+    def operation(collection):
         for email, event_ids in saved.items():
             collection.replace_one({"_id": email}, {"_id": email, "event_ids": list(dict.fromkeys(event_ids))}, upsert=True)
         if saved:
             collection.delete_many({"_id": {"$nin": list(saved)}})
         else:
             collection.delete_many({})
-    except Exception as exc:
-        raise StorageUnavailableError("Account storage is temporarily unavailable. Please try again in a few seconds.") from exc
+    mongo_call("saved", operation)
 
 app = FastAPI(title="Opportunity Atlas API", version="2.0.0")
 
