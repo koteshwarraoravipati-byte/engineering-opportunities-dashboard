@@ -748,6 +748,94 @@
       "approved": true,
       "collectionStatus": "discovery_only",
       "notes": "Official institutional domain added for national opportunity discovery; candidates require date, eligibility, relevance and current-status review before publication."
+    },
+    {
+      "id": "iitjammu-main",
+      "name": "Indian Institute of Technology Jammu",
+      "type": "official_college",
+      "state": "Jammu and Kashmir",
+      "district": "Jammu",
+      "homepage": "https://www.iitjammu.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "smvdu-main",
+      "name": "Shri Mata Vaishno Devi University",
+      "type": "official_college",
+      "state": "Jammu and Kashmir",
+      "district": "Katra, Reasi",
+      "homepage": "https://smvdu.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "pu-main",
+      "name": "Panjab University",
+      "type": "official_college",
+      "state": "Chandigarh",
+      "district": "Chandigarh",
+      "homepage": "https://puchd.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "iiitm-gwalior-main",
+      "name": "ABV-IIITM Gwalior",
+      "type": "official_college",
+      "state": "Madhya Pradesh",
+      "district": "Gwalior",
+      "homepage": "https://iiitm.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "gsssi-etw-main",
+      "name": "GSSS Institute of Engineering and Technology for Women",
+      "type": "official_college",
+      "state": "Karnataka",
+      "district": "Mysuru",
+      "homepage": "https://gsssietw.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "jnnce-main",
+      "name": "JNN College of Engineering",
+      "type": "official_college",
+      "state": "Karnataka",
+      "district": "Shivamogga",
+      "homepage": "https://www.jnnce.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "ptu-main",
+      "name": "Puducherry Technological University",
+      "type": "official_college",
+      "state": "Puducherry",
+      "district": "Puducherry",
+      "homepage": "https://ptuniv.edu.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "nitgoa-main",
+      "name": "National Institute of Technology Goa",
+      "type": "official_college",
+      "state": "Goa",
+      "district": "Goa",
+      "homepage": "https://nitgoa.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
     }
   ],
   "coverageNote": "National registry is expandable by state and institution; a college is added only after its official HTTPS domain is verified. Search results are discovery aids, never publication evidence.",
