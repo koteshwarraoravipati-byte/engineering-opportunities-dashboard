@@ -1,4 +1,4 @@
-"""Official-source discovery for engineering opportunities across Telangana.
+"""Official-source discovery for engineering opportunities across India.
 
 Google/search engines may be used for discovery, but the original official college or
 university page is the only evidence source. This script discovers candidates only; it
@@ -58,7 +58,7 @@ def candidate_links(source: dict) -> list[dict]:
         seen.add(url)
         candidates.append({
             "candidateId": hashlib.sha256((source["id"]+url+text).encode()).hexdigest()[:16],
-            "sourceId": source["id"], "institution": source["name"], "state":"Telangana", "district":source.get("district"),
+            "sourceId": source["id"], "institution": source["name"], "state":source.get("state") or "India", "district":source.get("district"),
             "sourceDomain":domain, "title": text[:220], "sourceUrl": url,
             "discoveredAt": now, "status": "needs_review",
             "reason": "Official institution-page candidate; date, eligibility, relevance and current status must be verified before publication."
@@ -73,7 +73,7 @@ def main():
         try: collected.extend(candidate_links(source))
         except Exception as exc: errors.append({"sourceId":source["id"],"error":str(exc)[:300]})
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps({"runAt":datetime.now(timezone.utc).isoformat(),"scope":"Telangana engineering colleges and universities","candidates":collected,"errors":errors},indent=2),encoding="utf-8")
+    OUT.write_text(json.dumps({"runAt":datetime.now(timezone.utc).isoformat(),"scope":"Engineering colleges and universities across India","candidates":collected,"errors":errors},indent=2),encoding="utf-8")
     print(json.dumps({"candidates":len(collected),"errors":len(errors)}))
 
 if __name__ == "__main__": main()
