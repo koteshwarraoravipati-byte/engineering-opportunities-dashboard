@@ -36,10 +36,10 @@ SECRET = os.getenv("SESSION_SECRET", "opportunity-atlas-dev-secret-change-me").e
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
 EMAIL_STRIP_CHARS = dict.fromkeys(map(ord, "\u200b\u200c\u200d\ufeff"), None)
 LOCK = threading.Lock()
-ASSISTANT_PROVIDER = os.getenv("ASSISTANT_PROVIDER", "openai").strip().casefold()
-ASSISTANT_API_KEY = os.getenv("ASSISTANT_API_KEY", "").strip()
-ASSISTANT_MODEL = os.getenv("ASSISTANT_MODEL", "gpt-4o-mini").strip()
-ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "https://api.openai.com/v1/chat/completions").strip()
+ASSISTANT_PROVIDER = os.getenv("ASSISTANT_PROVIDER", "gemini").strip().casefold()
+ASSISTANT_API_KEY = (os.getenv("ASSISTANT_API_KEY", "").strip() or (os.getenv("GEMINI_API_KEY", "").strip() if ASSISTANT_PROVIDER == "gemini" else ""))
+ASSISTANT_MODEL = os.getenv("ASSISTANT_MODEL", "gemini-2.5-flash" if ASSISTANT_PROVIDER == "gemini" else "gpt-4o-mini").strip()
+ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions" if ASSISTANT_PROVIDER == "gemini" else "https://api.openai.com/v1/chat/completions").strip()
 
 def normalize_email(value: str) -> str:
     """Return one stable key for the same Gmail address across all auth paths."""
