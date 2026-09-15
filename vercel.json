@@ -31,9 +31,5 @@
       ]
     }
   ],
-  "routes": [
-    { "src": "/catalog.js", "dest": "/catalog.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
   "cleanUrls": true
 }
