@@ -333,7 +333,8 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
         ASSISTANT_LAST_ERROR = "invalid provider response"
     fallback = assistant_fallback(message, state, district)
     fallback["notice"] = "The AI service was unavailable, so this answer uses the verified Atlas catalog directly."
-    return fallback
+    return fallback
+
 
 def token_for(email: str) -> str:
     payload = base64.urlsafe_b64encode(json.dumps({"email": email, "exp": int(datetime.now(timezone.utc).timestamp()) + 60 * 60 * 24 * 7}, separators=(",", ":")).encode()).decode().rstrip("=")
@@ -454,7 +455,12 @@ def events(state: str | None = None, area: str | None = None, college: str | Non
 @app.post("/api/assistant")
 def assistant(payload: AssistantRequest, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
     message = payload.message.strip()
-    return generate_assistant_answer(message, payload.state.strip(), payload.district.strip())
+    if not ASSISTANT_SEMAPHORE.acquire(blocking=False):
+        raise HTTPException(status_code=429, detail="Atlas AI is busy. Please retry in a few seconds.")
+    try:
+        return generate_assistant_answer(message, payload.state.strip(), payload.district.strip())
+    finally:
+        ASSISTANT_SEMAPHORE.release()
 
 @app.get("/api/me/saved")
 def get_saved(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
