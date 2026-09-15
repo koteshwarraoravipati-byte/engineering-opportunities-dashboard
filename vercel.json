@@ -1,9 +1,11 @@
 {
   "version": 2,
   "builds": [
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "catalog.js", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/catalog.js", "dest": "/catalog.js" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
   "cleanUrls": true
