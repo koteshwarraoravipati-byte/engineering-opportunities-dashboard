@@ -40,6 +40,7 @@ ASSISTANT_PROVIDER = os.getenv("ASSISTANT_PROVIDER", "gemini").strip().casefold(
 ASSISTANT_API_KEY = (os.getenv("ASSISTANT_API_KEY", "").strip() or (os.getenv("GEMINI_API_KEY", "").strip() if ASSISTANT_PROVIDER == "gemini" else ""))
 ASSISTANT_MODEL = os.getenv("ASSISTANT_MODEL", "gemini-2.5-flash" if ASSISTANT_PROVIDER == "gemini" else "gpt-4o-mini").strip()
 ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions" if ASSISTANT_PROVIDER == "gemini" else "https://api.openai.com/v1/chat/completions").strip()
+ASSISTANT_LAST_ERROR = ""
 
 def normalize_email(value: str) -> str:
     """Return one stable key for the same Gmail address across all auth paths."""
@@ -303,9 +304,17 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
             result = json.loads(response.read().decode("utf-8"))
         answer = str((((result.get("choices") or [{}])[0].get("message") or {}).get("content") or "")).strip()
         if answer:
+            global ASSISTANT_LAST_ERROR
+            ASSISTANT_LAST_ERROR = ""
             return {"answer": answer, "matches": matches, "provider": ASSISTANT_PROVIDER, "configured": True}
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError, KeyError, IndexError, TypeError):
-        pass
+    except urllib.error.HTTPError as error:
+        ASSISTANT_LAST_ERROR = f"HTTP {error.code}"
+    except urllib.error.URLError:
+        ASSISTANT_LAST_ERROR = "network error"
+    except TimeoutError:
+        ASSISTANT_LAST_ERROR = "timeout"
+    except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+        ASSISTANT_LAST_ERROR = "invalid provider response"
     fallback = assistant_fallback(message, state, district)
     fallback["notice"] = "The AI service was unavailable, so this answer uses the verified Atlas catalog directly."
     return fallback
@@ -343,7 +352,7 @@ def health() -> dict[str, Any]:
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
     published = [e for e in items if publishable_event(e)]
-    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "assistant_provider":ASSISTANT_PROVIDER, "assistant_configured":bool(ASSISTANT_API_KEY), "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
+    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "assistant_provider":ASSISTANT_PROVIDER, "assistant_configured":bool(ASSISTANT_API_KEY), "assistant_last_error":ASSISTANT_LAST_ERROR, "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
 
 @app.post("/api/auth/register", status_code=201)
 def register(payload: RegisterCredentials) -> dict[str, Any]:
