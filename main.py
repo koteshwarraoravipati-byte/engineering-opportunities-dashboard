@@ -317,7 +317,13 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
             ASSISTANT_LAST_ERROR = ""
             return {"answer": answer, "matches": matches, "provider": ASSISTANT_PROVIDER, "configured": True}
     except urllib.error.HTTPError as error:
-        ASSISTANT_LAST_ERROR = f"HTTP {error.code}"
+        category = ""
+        try:
+            provider_error = json.loads(error.read().decode("utf-8")).get("error") or {}
+            category = str(provider_error.get("status") or "").strip().upper()
+        except (json.JSONDecodeError, UnicodeDecodeError, AttributeError, TypeError):
+            category = ""
+        ASSISTANT_LAST_ERROR = f"HTTP {error.code}" + (f" ({category})" if category else "")
     except urllib.error.URLError:
         ASSISTANT_LAST_ERROR = "network error"
     except TimeoutError:
