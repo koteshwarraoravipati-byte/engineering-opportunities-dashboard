@@ -4,6 +4,14 @@
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "catalog.js", "use": "@vercel/static" }
   ],
+  "headers": [
+    {
+      "source": "/catalog.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" }
+      ]
+    }
+  ],
   "routes": [
     { "src": "/catalog.js", "dest": "/catalog.js" },
     { "src": "/(.*)", "dest": "/index.html" }
