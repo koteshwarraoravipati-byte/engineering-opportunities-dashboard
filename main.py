@@ -41,6 +41,7 @@ ASSISTANT_API_KEY = (os.getenv("ASSISTANT_API_KEY", "").strip() or (os.getenv("G
 ASSISTANT_MODEL = os.getenv("ASSISTANT_MODEL", "gemini-2.5-flash" if ASSISTANT_PROVIDER == "gemini" else "gpt-4o-mini").strip()
 ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "").strip()
 ASSISTANT_LAST_ERROR = ""
+ASSISTANT_SEMAPHORE = threading.BoundedSemaphore(8)
 
 def normalize_email(value: str) -> str:
     """Return one stable key for the same Gmail address across all auth paths."""
