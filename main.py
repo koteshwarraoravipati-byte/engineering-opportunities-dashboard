@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from typing import Any
 
 import bcrypt
@@ -39,7 +39,7 @@ LOCK = threading.Lock()
 ASSISTANT_PROVIDER = os.getenv("ASSISTANT_PROVIDER", "gemini").strip().casefold()
 ASSISTANT_API_KEY = (os.getenv("ASSISTANT_API_KEY", "").strip() or (os.getenv("GEMINI_API_KEY", "").strip() if ASSISTANT_PROVIDER == "gemini" else ""))
 ASSISTANT_MODEL = os.getenv("ASSISTANT_MODEL", "gemini-2.5-flash" if ASSISTANT_PROVIDER == "gemini" else "gpt-4o-mini").strip()
-ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions" if ASSISTANT_PROVIDER == "gemini" else "https://api.openai.com/v1/chat/completions").strip()
+ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "").strip()
 ASSISTANT_LAST_ERROR = ""
 
 def normalize_email(value: str) -> str:
@@ -294,15 +294,24 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
               "Interpret relative deadline questions using today's date only when a concrete deadline is present. If dates are missing or ambiguous, say that instead of guessing. "
               "If the catalog does not answer the question, say so and suggest a useful filter or official-source check. "
               "Do not submit applications, request passwords, provide financial advice, or claim an opportunity is open unless the context supports it.")
-    body = {"model": ASSISTANT_MODEL, "temperature": 0.15, "max_tokens": 650, "messages": [
-        {"role": "system", "content": system},
-        {"role": "user", "content": f"Today (UTC): {today}\nUser question: {message}\nSelected state: {state or 'All states'}\nSelected district: {district or 'All districts'}\nCatalog context: {assistant_context(matches)}"}
-    ]}
+    user_prompt = f"Today (UTC): {today}\nUser question: {message}\nSelected state: {state or 'All states'}\nSelected district: {district or 'All districts'}\nCatalog context: {assistant_context(matches)}"
+    if ASSISTANT_PROVIDER == "gemini":
+        endpoint = ASSISTANT_API_URL or f"https://generativelanguage.googleapis.com/v1beta/models/{quote(ASSISTANT_MODEL, safe='')}:generateContent"
+        body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": [{"role": "user", "parts": [{"text": user_prompt}]}], "generationConfig": {"temperature": 0.15, "maxOutputTokens": 650}}
+        headers = {"x-goog-api-key": ASSISTANT_API_KEY, "Content-Type": "application/json"}
+    else:
+        endpoint = ASSISTANT_API_URL or "https://api.openai.com/v1/chat/completions"
+        body = {"model": ASSISTANT_MODEL, "temperature": 0.15, "max_tokens": 650, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user_prompt}]}
+        headers = {"Authorization": f"Bearer {ASSISTANT_API_KEY}", "Content-Type": "application/json"}
     try:
-        request = urllib.request.Request(ASSISTANT_API_URL, data=json.dumps(body).encode("utf-8"), headers={"Authorization": f"Bearer {ASSISTANT_API_KEY}", "Content-Type": "application/json"}, method="POST")
+        request = urllib.request.Request(endpoint, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
         with urllib.request.urlopen(request, timeout=20) as response:
             result = json.loads(response.read().decode("utf-8"))
-        answer = str((((result.get("choices") or [{}])[0].get("message") or {}).get("content") or "")).strip()
+        if ASSISTANT_PROVIDER == "gemini":
+            parts = (((result.get("candidates") or [{}])[0].get("content") or {}).get("parts") or [])
+            answer = "\n".join(str(part.get("text") or "").strip() for part in parts if isinstance(part, dict)).strip()
+        else:
+            answer = str((((result.get("choices") or [{}])[0].get("message") or {}).get("content") or "")).strip()
         if answer:
             global ASSISTANT_LAST_ERROR
             ASSISTANT_LAST_ERROR = ""
