@@ -296,7 +296,7 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
               "Do not submit applications, request passwords, provide financial advice, or claim an opportunity is open unless the context supports it.")
     user_prompt = f"Today (UTC): {today}\nUser question: {message}\nSelected state: {state or 'All states'}\nSelected district: {district or 'All districts'}\nCatalog context: {assistant_context(matches)}"
     if ASSISTANT_PROVIDER == "gemini":
-        endpoint = ASSISTANT_API_URL or f"https://generativelanguage.googleapis.com/v1beta/models/{quote(ASSISTANT_MODEL, safe='')}:generateContent"
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{quote(ASSISTANT_MODEL, safe='')}:generateContent"
         body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": [{"role": "user", "parts": [{"text": user_prompt}]}], "generationConfig": {"temperature": 0.15, "maxOutputTokens": 650}}
         headers = {"x-goog-api-key": ASSISTANT_API_KEY, "Content-Type": "application/json"}
     else:
