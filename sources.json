@@ -836,6 +836,50 @@
       "approved": true,
       "collectionStatus": "discovery_only",
       "notes": "Official institutional source added during national coverage follow-up; candidates remain review-first."
+    },
+    {
+      "id": "iittp-main",
+      "name": "Indian Institute of Technology Tirupati",
+      "type": "official_college",
+      "state": "Andhra Pradesh",
+      "district": "Tirupati",
+      "homepage": "https://www.iittp.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official source added during India-wide event expansion."
+    },
+    {
+      "id": "iiitdmk-main",
+      "name": "Indian Institute of Information Technology Design and Manufacturing Kurnool",
+      "type": "official_college",
+      "state": "Andhra Pradesh",
+      "district": "Kurnool",
+      "homepage": "https://iiitk.ac.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official source added during India-wide event expansion."
+    },
+    {
+      "id": "mea-internship",
+      "name": "Ministry of External Affairs Internship Portal",
+      "type": "official_government",
+      "state": "Delhi",
+      "district": "New Delhi",
+      "homepage": "https://internship.mea.gov.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official source added during India-wide event expansion."
+    },
+    {
+      "id": "nielit-main",
+      "name": "National Institute of Electronics and Information Technology",
+      "type": "official_government",
+      "state": "Delhi",
+      "district": "New Delhi",
+      "homepage": "https://nielit.gov.in/",
+      "approved": true,
+      "collectionStatus": "discovery_only",
+      "notes": "Official source added during India-wide event expansion."
     }
   ],
   "coverageNote": "National registry is expandable by state and institution; a college is added only after its official HTTPS domain is verified. Search results are discovery aids, never publication evidence.",
