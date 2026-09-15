@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from functools import lru_cache
 import hashlib
 import hmac
 import json
@@ -19,6 +20,7 @@ from typing import Any
 import bcrypt
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
@@ -179,6 +181,7 @@ async def storage_unavailable_handler(request, exc):
 configured_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 origins = ["*"] if "*" in configured_origins else list(dict.fromkeys(configured_origins + ["https://eod-warangal.vercel.app", "https://engineering-opportunities-dashboard.vercel.app"]))
 app.add_middleware(CORSMiddleware, allow_origins=origins if origins else ["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Public records include verified opportunities and clearly labelled source leads; no synthetic records are generated.
 class Credentials(BaseModel):
@@ -232,6 +235,7 @@ def publishable_event(event: dict[str, Any]) -> bool:
     status_allowed = status_value in {"verified", "needs_review", "unverified"}
     return (str(event.get("visibility", "published")).lower() in {"published", "needs_review"} and status_allowed and all(required) and has_date_or_deadline)
 
+@lru_cache(maxsize=1)
 def load_events() -> list[dict[str, Any]]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
