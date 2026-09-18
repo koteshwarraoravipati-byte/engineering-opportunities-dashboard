@@ -2,7 +2,6 @@
   "version": 2,
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
-    { "src": "catalog.js", "use": "@vercel/static" },
     { "src": "catalog.json", "use": "@vercel/static" }
   ],
   "headers": [
@@ -16,12 +15,6 @@
       "source": "/index.html",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400" }
-      ]
-    },
-    {
-      "source": "/catalog.js",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" }
       ]
     },
     {
