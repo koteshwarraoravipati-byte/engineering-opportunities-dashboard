@@ -41,6 +41,7 @@ ASSISTANT_API_KEY = (os.getenv("ASSISTANT_API_KEY", "").strip() or (os.getenv("G
 ASSISTANT_MODEL = os.getenv("ASSISTANT_MODEL", "gemini-2.5-flash" if ASSISTANT_PROVIDER == "gemini" else "gpt-4o-mini").strip()
 ASSISTANT_API_URL = os.getenv("ASSISTANT_API_URL", "").strip()
 ASSISTANT_LAST_ERROR = ""
+ASSISTANT_LAST_MODEL = ""
 ASSISTANT_SEMAPHORE = threading.BoundedSemaphore(8)
 
 def normalize_email(value: str) -> str:
@@ -219,7 +220,7 @@ def write_json(path: Path, value: Any) -> None:
     temp.replace(path)
 
 def normalize_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
-    return {"id": str(raw.get("id") or raw.get("event_id") or f"opportunity-{index}"), "title": raw.get("title") or raw.get("name") or "Engineering opportunity", "organization": raw.get("organization") or raw.get("organizer") or raw.get("company") or "Local engineering community", "organizer": raw.get("organizer") or raw.get("organization") or raw.get("company") or "Local engineering community", "institution": raw.get("institution") or raw.get("college") or raw.get("organization") or "Engineering student community", "location": raw.get("location") or raw.get("venue") or "India", "venue": raw.get("venue") or raw.get("location") or "India", "state": raw.get("state") or "India", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "college": raw.get("college") or raw.get("institution") or "Indian engineering college", "branch": raw.get("branch") or raw.get("eligibility") or "All engineering branches", "year": raw.get("year") or "2025 / 2026", "type": raw.get("type") or raw.get("eventType") or "Opportunity", "mode": raw.get("mode") or "See organizer page", "startAt": raw.get("startAt"), "endAt": raw.get("endAt"), "deadline": raw.get("deadline") or raw.get("deadlineAt") or "Rolling", "deadlineAt": raw.get("deadlineAt"), "summary": raw.get("summary") or raw.get("description") or "Explore this engineering opportunity.", "description": raw.get("description") or raw.get("summary") or "Details available from the organizer.", "eligibility": raw.get("eligibility") or "Check the organizer page for eligibility details.", "applyUrl": raw.get("applyUrl") or raw.get("registrationUrl") or raw.get("url") or "#", "sourceUrl": raw.get("sourceUrl"), "sourceType": raw.get("sourceType") or raw.get("source_type") or "", "sourceStatus": raw.get("sourceStatus") or "verified", "visibility": raw.get("visibility") or "published", "state": raw.get("state") or "India", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "confidence": raw.get("confidence"), "tags": raw.get("tags") or [raw.get("type") or "Opportunity"]}
+    return {"id": str(raw.get("id") or raw.get("event_id") or f"opportunity-{index}"), "title": raw.get("title") or raw.get("name") or "Engineering opportunity", "organization": raw.get("organization") or raw.get("organizer") or raw.get("company") or "Local engineering community", "organizer": raw.get("organizer") or raw.get("organization") or raw.get("company") or "Local engineering community", "institution": raw.get("institution") or raw.get("college") or raw.get("organization") or "Engineering student community", "location": raw.get("location") or raw.get("venue") or "India", "venue": raw.get("venue") or raw.get("location") or "India", "state": raw.get("state") or "India", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "college": raw.get("college") or raw.get("institution") or "Indian engineering college", "branch": raw.get("branch") or raw.get("eligibility") or "All engineering branches", "year": raw.get("year") or "2025 / 2026", "type": raw.get("type") or raw.get("eventType") or "Opportunity", "mode": raw.get("mode") or "See organizer page", "startAt": raw.get("startAt"), "endAt": raw.get("endAt"), "deadline": raw.get("deadline") or raw.get("deadlineAt") or "Rolling", "deadlineAt": raw.get("deadlineAt"), "summary": raw.get("summary") or raw.get("description") or "Explore this engineering opportunity.", "description": raw.get("description") or raw.get("summary") or "Details available from the organizer.", "eligibility": raw.get("eligibility") or "Check the organizer page for eligibility details.", "applyUrl": raw.get("applyUrl") or raw.get("registrationUrl") or raw.get("url") or "#", "sourceUrl": raw.get("sourceUrl"), "sourceType": raw.get("sourceType") or raw.get("source_type") or "", "sourceStatus": raw.get("sourceStatus") or "verified", "visibility": raw.get("visibility") or "published", "availabilityStatus": raw.get("availabilityStatus") or "", "state": raw.get("state") or "India", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "confidence": raw.get("confidence"), "tags": raw.get("tags") or [raw.get("type") or "Opportunity"]}
 
 def has_official_source(event: dict[str, Any]) -> bool:
     url = str(event.get("sourceUrl") or "").strip()
@@ -284,8 +285,10 @@ def assistant_fallback(message: str, state: str = "", district: str = "") -> dic
     return {"answer": answer, "matches": matches, "provider": "catalog", "configured": bool(ASSISTANT_API_KEY)}
 
 def generate_assistant_answer(message: str, state: str = "", district: str = "") -> dict[str, Any]:
+    global ASSISTANT_LAST_ERROR, ASSISTANT_LAST_MODEL
     matches = assistant_matches(message, state, district)
     if not ASSISTANT_API_KEY:
+        ASSISTANT_LAST_MODEL = ""
         return assistant_fallback(message, state, district)
     today = datetime.now(timezone.utc).date().isoformat()
     system = ("You are Atlas AI, a careful opportunity-finding assistant for engineering students. Answer only from the supplied catalog context. "
@@ -296,41 +299,48 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
               "If the catalog does not answer the question, say so and suggest a useful filter or official-source check. "
               "Do not submit applications, request passwords, provide financial advice, or claim an opportunity is open unless the context supports it.")
     user_prompt = f"Today (UTC): {today}\nUser question: {message}\nSelected state: {state or 'All states'}\nSelected district: {district or 'All districts'}\nCatalog context: {assistant_context(matches)}"
-    if ASSISTANT_PROVIDER == "gemini":
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{quote(ASSISTANT_MODEL, safe='')}:generateContent"
+    def parse_gemini(result: dict[str, Any]) -> str:
+        parts = (((result.get("candidates") or [{}])[0].get("content") or {}).get("parts") or [])
+        return "\n".join(str(part.get("text") or "").strip() for part in parts if isinstance(part, dict)).strip()
+    def call_gemini(model: str) -> str:
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{quote(model, safe='')}:generateContent"
         body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": [{"role": "user", "parts": [{"text": user_prompt}]}], "generationConfig": {"temperature": 0.15, "maxOutputTokens": 650}}
-        headers = {"x-goog-api-key": ASSISTANT_API_KEY, "Content-Type": "application/json"}
-    else:
+        request = urllib.request.Request(endpoint, data=json.dumps(body).encode("utf-8"), headers={"x-goog-api-key": ASSISTANT_API_KEY, "Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return parse_gemini(json.loads(response.read().decode("utf-8")))
+    def call_openai() -> str:
         endpoint = ASSISTANT_API_URL or "https://api.openai.com/v1/chat/completions"
         body = {"model": ASSISTANT_MODEL, "temperature": 0.15, "max_tokens": 650, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user_prompt}]}
-        headers = {"Authorization": f"Bearer {ASSISTANT_API_KEY}", "Content-Type": "application/json"}
-    try:
-        request = urllib.request.Request(endpoint, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+        request = urllib.request.Request(endpoint, data=json.dumps(body).encode("utf-8"), headers={"Authorization": f"Bearer {ASSISTANT_API_KEY}", "Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(request, timeout=20) as response:
             result = json.loads(response.read().decode("utf-8"))
-        if ASSISTANT_PROVIDER == "gemini":
-            parts = (((result.get("candidates") or [{}])[0].get("content") or {}).get("parts") or [])
-            answer = "\n".join(str(part.get("text") or "").strip() for part in parts if isinstance(part, dict)).strip()
-        else:
-            answer = str((((result.get("choices") or [{}])[0].get("message") or {}).get("content") or "")).strip()
-        if answer:
-            global ASSISTANT_LAST_ERROR
-            ASSISTANT_LAST_ERROR = ""
-            return {"answer": answer, "matches": matches, "provider": ASSISTANT_PROVIDER, "configured": True}
-    except urllib.error.HTTPError as error:
-        category = ""
+        return str((((result.get("choices") or [{}])[0].get("message") or {}).get("content") or "")).strip()
+    models = [ASSISTANT_MODEL]
+    if ASSISTANT_PROVIDER == "gemini":
+        for candidate in ("gemini-2.5-flash-lite", "gemini-2.0-flash"):
+            if candidate not in models: models.append(candidate)
+    for model in models:
         try:
-            provider_error = json.loads(error.read().decode("utf-8")).get("error") or {}
-            category = str(provider_error.get("status") or "").strip().upper()
-        except (json.JSONDecodeError, UnicodeDecodeError, AttributeError, TypeError):
+            answer = call_gemini(model) if ASSISTANT_PROVIDER == "gemini" else call_openai()
+            if answer:
+                ASSISTANT_LAST_ERROR = ""; ASSISTANT_LAST_MODEL = model if ASSISTANT_PROVIDER == "gemini" else ASSISTANT_MODEL
+                return {"answer": answer, "matches": matches, "provider": ASSISTANT_PROVIDER, "configured": True}
+            ASSISTANT_LAST_ERROR = "empty provider response"
+        except urllib.error.HTTPError as error:
             category = ""
-        ASSISTANT_LAST_ERROR = f"HTTP {error.code}" + (f" ({category})" if category else "")
-    except urllib.error.URLError:
-        ASSISTANT_LAST_ERROR = "network error"
-    except TimeoutError:
-        ASSISTANT_LAST_ERROR = "timeout"
-    except (json.JSONDecodeError, KeyError, IndexError, TypeError):
-        ASSISTANT_LAST_ERROR = "invalid provider response"
+            try:
+                provider_error = json.loads(error.read().decode("utf-8")).get("error") or {}
+                category = str(provider_error.get("status") or "").strip().upper()
+            except (json.JSONDecodeError, UnicodeDecodeError, AttributeError, TypeError):
+                category = ""
+            ASSISTANT_LAST_ERROR = f"HTTP {error.code}" + (f" ({category})" if category else "") + (f" [{model}]" if ASSISTANT_PROVIDER == "gemini" else "")
+            if not (ASSISTANT_PROVIDER == "gemini" and error.code in {400, 404} and model != models[-1]): break
+        except urllib.error.URLError:
+            ASSISTANT_LAST_ERROR = "network error"; break
+        except TimeoutError:
+            ASSISTANT_LAST_ERROR = "timeout"; break
+        except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+            ASSISTANT_LAST_ERROR = "invalid provider response"; break
     fallback = assistant_fallback(message, state, district)
     fallback["notice"] = "The AI service was unavailable, so this answer uses the verified Atlas catalog directly."
     return fallback
@@ -369,7 +379,7 @@ def health() -> dict[str, Any]:
     if isinstance(raw, dict): raw = raw.get("events", [])
     items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
     published = [e for e in items if publishable_event(e)]
-    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "assistant_provider":ASSISTANT_PROVIDER, "assistant_configured":bool(ASSISTANT_API_KEY), "assistant_last_error":ASSISTANT_LAST_ERROR, "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
+    return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "archived_records":sum(1 for e in items if str(e.get("visibility", "")).lower() == "archived"), "deadline_passed_records":sum(1 for e in items if str(e.get("availabilityStatus", "")).lower() == "deadline_passed"), "assistant_provider":ASSISTANT_PROVIDER, "assistant_model":ASSISTANT_MODEL, "assistant_last_model":ASSISTANT_LAST_MODEL, "assistant_configured":bool(ASSISTANT_API_KEY), "assistant_last_error":ASSISTANT_LAST_ERROR, "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
 
 @app.post("/api/auth/register", status_code=201)
 def register(payload: RegisterCredentials) -> dict[str, Any]:
