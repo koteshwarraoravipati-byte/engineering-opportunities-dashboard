@@ -1,13 +1,13 @@
 # Engineering Opportunities Dashboard
 
-A student-first portal for verified engineering opportunities across Telangana.
+A student-first portal for verified engineering opportunities across India.
 
 ## Current behavior
 - Responsive portal with the existing card-based visual design, search, location, college, branch and graduation-year filters.
-- Telangana-wide location scope, currently seeded with verified official opportunities from Warangal, Hyderabad and Sangareddy.
+- India-wide state/UT filters, seeded with verified official opportunities and clearly separated review/source-lead lanes.
 - Public records are shown only when they have a concrete date or deadline, an organizer/institution, a direct HTTPS source URL on an official institution domain, and an explicit `verified` status.
 - Undated or uncertain records remain in review and are not shown publicly.
-- No synthetic fallback opportunities are displayed when the verified dataset is empty.
+- Fully ended opportunities are archived from the public catalog; future events with passed deadlines are labelled for organizer confirmation.
 - Each published card links back to its official college/university source page.
 
 ## Source and verification policy

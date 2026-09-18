@@ -25,7 +25,9 @@
     "lastCheckedAt": "2026-08-29T12:00:00+05:30",
     "state": "Telangana",
     "district": "Warangal",
-    "area": "Warangal"
+    "area": "Warangal",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "nitw-ised-2026",
@@ -53,7 +55,9 @@
     "lastCheckedAt": "2026-08-29T12:00:00+05:30",
     "state": "Telangana",
     "district": "Warangal",
-    "area": "Warangal"
+    "area": "Warangal",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "nitw-mica-2026",
@@ -81,7 +85,9 @@
     "lastCheckedAt": "2026-08-29T12:00:00+05:30",
     "state": "Telangana",
     "district": "Warangal",
-    "area": "Warangal"
+    "area": "Warangal",
+    "availabilityStatus": "open",
+    "deadline": "12 Nov 2026"
   },
   {
     "id": "kitsw-summer-internships",
@@ -109,7 +115,9 @@
     "lastCheckedAt": "2026-08-29T12:00:00+05:30",
     "state": "Telangana",
     "district": "Warangal",
-    "area": "Warangal"
+    "area": "Warangal",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "kitsw-placements-training",
@@ -137,7 +145,9 @@
     "lastCheckedAt": "2026-08-29T12:00:00+05:30",
     "state": "Telangana",
     "district": "Warangal",
-    "area": "Warangal"
+    "area": "Warangal",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "sru-drdo-jrf-2026",
@@ -166,7 +176,9 @@
     "lastCheckedAt": "2026-08-29T12:00:00+05:30",
     "state": "Telangana",
     "district": "Warangal",
-    "area": "Warangal"
+    "area": "Warangal",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "iith-sec-2026",
@@ -194,7 +206,9 @@
       "conference",
       "IIT Hyderabad"
     ],
-    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "iith-mechbio-2026",
@@ -223,7 +237,9 @@
       "conference",
       "IIT Hyderabad"
     ],
-    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "iith-inae-2026",
@@ -252,7 +268,9 @@
       "conference",
       "IIT Hyderabad"
     ],
-    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "iith-ai-agents-2026",
@@ -281,7 +299,9 @@
       "training",
       "IIT Hyderabad"
     ],
-    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "vjit-sih-2026",
@@ -299,7 +319,7 @@
     "sourceUrl": "https://vjit.edu.in/internal-hackathon-smart-india-hackathon-sih-2026/",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.96,
     "state": "Telangana",
     "district": "Hyderabad",
@@ -309,7 +329,10 @@
       "SIH 2026",
       "VJIT"
     ],
-    "lastCheckedAt": "2026-09-02T13:20:00+05:30"
+    "lastCheckedAt": "2026-09-02T13:20:00+05:30",
+    "availabilityStatus": "closed",
+    "deadline": "Closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "mgit-prompt-engineering-2026",
@@ -327,7 +350,7 @@
     "sourceUrl": "https://mgit.ac.in/events/aicte-vaani-sponsored-3-day-workshop-on-mastering-prompt-engineering-for-generative-ai/",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.96,
     "state": "Telangana",
     "district": "Rangareddy",
@@ -339,7 +362,10 @@
       "workshop",
       "MGIT"
     ],
-    "lastCheckedAt": "2026-09-02T14:47:00+05:30"
+    "lastCheckedAt": "2026-09-02T14:47:00+05:30",
+    "availabilityStatus": "closed",
+    "deadline": "Closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "mgit-sih-2026",
@@ -357,7 +383,7 @@
     "sourceUrl": "https://mgit.ac.in/events/mgit-internal-hackathon-smart-india-hackathon-sih-2026/",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.96,
     "state": "Telangana",
     "district": "Rangareddy",
@@ -367,7 +393,10 @@
       "SIH 2026",
       "MGIT"
     ],
-    "lastCheckedAt": "2026-09-02T14:47:00+05:30"
+    "lastCheckedAt": "2026-09-02T14:47:00+05:30",
+    "availabilityStatus": "closed",
+    "deadline": "Closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "nitw-cis-2026",
@@ -386,7 +415,7 @@
     "sourceUrl": "https://scrs.in/conference/cis2026",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.92,
     "tags": [
       "Conference",
@@ -397,9 +426,11 @@
     "area": "Hanamkonda",
     "branch": "All engineering branches",
     "year": "2026 / 2027",
-    "deadline": "2026-08-21",
+    "deadline": "Closed",
     "description": "Source-linked record for 7th Congress on Intelligent Systems (CIS 2026). Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "nitw-nep-orientation-2026",
@@ -418,7 +449,7 @@
     "sourceUrl": "https://nitw.ac.in/api/static/files/MMTTC_Workshop_01092026_2026-9-1-16-40-7.pdf",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.94,
     "tags": [
       "Orientation",
@@ -429,9 +460,11 @@
     "area": "Hanamkonda",
     "branch": "All engineering branches",
     "year": "2026 / 2027",
-    "deadline": "2026-09-04",
+    "deadline": "Closed",
     "description": "Source-linked record for 8-Day Online NEP Orientation & Sensitization. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "nitw-ev-fdp-2026",
@@ -461,9 +494,10 @@
     "area": "Hanamkonda",
     "branch": "EEE",
     "year": "2026 / 2027",
-    "deadline": "2026-09-13",
+    "deadline": "Deadline passed — check organizer",
     "description": "Source-linked record for Next-Generation EV Propulsion Control FDP. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "deadline_passed"
   },
   {
     "id": "nitw-cps-fdp-2026",
@@ -493,9 +527,10 @@
     "area": "Hanamkonda",
     "branch": "EEE",
     "year": "2026 / 2027",
-    "deadline": "2026-09-15",
+    "deadline": "Deadline passed — check organizer",
     "description": "Source-linked record for Cyber Physical Systems and Applications in Electrical Engineering FDP. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "deadline_passed"
   },
   {
     "id": "nitw-image-analysis-2026",
@@ -525,9 +560,10 @@
     "area": "Hanamkonda",
     "branch": "ECE / CSE",
     "year": "2026 / 2027",
-    "deadline": "2026-10-03",
+    "deadline": "3 Oct 2026",
     "description": "Source-linked record for Computational Image Analysis using ML and Vision-Based Models. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "nitw-materials-studio-2026",
@@ -557,9 +593,10 @@
     "area": "Hanamkonda",
     "branch": "Civil / Biotechnology",
     "year": "2026 / 2027",
-    "deadline": "2026-10-30",
+    "deadline": "30 Oct 2026",
     "description": "Source-linked record for Molecules to Materials: Hands-on with Discovery and Materials Studio. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "nitw-acods-2026",
@@ -589,9 +626,10 @@
     "area": "Hanamkonda",
     "branch": "EEE / ECE / CSE",
     "year": "2026 / 2027",
-    "deadline": "2026-09-10",
+    "deadline": "Deadline passed — check organizer",
     "description": "Source-linked record for 9th IFAC International Conference on Advances in Control and Optimization of Dynamical Systems. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "deadline_passed"
   },
   {
     "id": "nitw-icsp-2026",
@@ -623,7 +661,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for 5th International Conference on Security & Privacy (ICSP 2026). Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "nitw-swat-2027",
@@ -653,9 +692,10 @@
     "area": "Hanamkonda",
     "branch": "Civil / Environmental",
     "year": "2026 / 2027",
-    "deadline": "2026-11-01",
+    "deadline": "1 Nov 2026",
     "description": "Source-linked record for International SWAT Conference 2027. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "nitw-icramie-2027",
@@ -685,9 +725,10 @@
     "area": "Hanamkonda",
     "branch": "Mechanical",
     "year": "2026 / 2027",
-    "deadline": "2026-10-30",
+    "deadline": "30 Oct 2026",
     "description": "Source-linked record for International Conference on Recent Advances in Manufacturing & Industrial Engineering (ICRAMIE-2027). Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "nitw-ai-agri-health-2026",
@@ -719,7 +760,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for AI-Powered Computer Vision for Smart Agriculture and Healthcare. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "nitw-icseis-2026",
@@ -751,7 +793,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for ICSEIS 2026 — International Conference on Sustainable Electronics and Intelligent Sensing. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "sru-pragathi-2026",
@@ -783,7 +826,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for PRAGATHI 2K26 / PRAGATHI 2.0 National-Level Project Expo. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "jntuh-certificate-2026",
@@ -813,9 +857,10 @@
     "area": "Hyderabad",
     "branch": "CSE / IT",
     "year": "2026 / 2027",
-    "deadline": "2026-10-01",
+    "deadline": "1 Oct 2026",
     "description": "Source-linked record for Six-Month Online Certificate Courses: Data Analytics & AI-Powered Business Intelligence; Artificial Intelligence & Deep Tech. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "iiith-digital-demos-2026",
@@ -834,7 +879,7 @@
     "sourceUrl": "https://www.iiit.ac.in/digital-demos-data-power-and-politics-in-the-eu-and-india-9-and-10-september-2026/",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.9,
     "tags": [
       "Conference",
@@ -845,9 +890,11 @@
     "area": "Hyderabad",
     "branch": "All engineering branches",
     "year": "2026 / 2027",
-    "deadline": "Not stated",
+    "deadline": "Closed",
     "description": "Source-linked record for Digital Demos: Data, Power and Politics in the EU and India. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "iith-cirman-2026",
@@ -879,7 +926,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for CIRMAN Workshop — Circular Manufacturing. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "mjcet-iccmm-2026",
@@ -909,9 +957,10 @@
     "area": "Hyderabad",
     "branch": "CSE / ECE / EEE",
     "year": "2026 / 2027",
-    "deadline": "2026-09-30",
+    "deadline": "30 Sep 2026",
     "description": "Source-linked record for ICCMM-26: International Conference on Next-Gen Computing. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "mahindra-ccsn-2026",
@@ -941,9 +990,10 @@
     "area": "Hyderabad",
     "branch": "ECE / CSE",
     "year": "2026 / 2027",
-    "deadline": "2026-11-10",
+    "deadline": "10 Nov 2026",
     "description": "Source-linked record for International Conference on Contemporary Communication and Secure Networks (CCSN). Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "iith-photonics-2026",
@@ -973,9 +1023,10 @@
     "area": "Sangareddy",
     "branch": "ECE / EEE",
     "year": "2026 / 2027",
-    "deadline": "2026-09-10",
+    "deadline": "Deadline passed — check organizer",
     "description": "Source-linked record for Photonics 2026. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "deadline_passed"
   },
   {
     "id": "uceou-ncrs-2026",
@@ -1005,9 +1056,10 @@
     "area": "Hyderabad",
     "branch": "Mechanical / Civil",
     "year": "2026 / 2027",
-    "deadline": "2026-09-30",
+    "deadline": "30 Sep 2026",
     "description": "Source-linked record for SRESA 7th National Conference on Reliability and Safety (NCRS-2026). Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "iith-nmamld-2026",
@@ -1039,7 +1091,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for International Workshop on Nonlocal Mechanics Approaches for Modelling Localized Deformations. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "bits-veda-2026",
@@ -1069,9 +1122,10 @@
     "area": "Medchal-Malkajgiri",
     "branch": "EEE / ECE",
     "year": "2026 / 2027",
-    "deadline": "2026-11-15",
+    "deadline": "15 Nov 2026",
     "description": "Source-linked record for VEDA 2026: National Conference on Emerging Trends in Vacuum Electronic Devices & Applications. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "woxsen-fts-2026",
@@ -1103,7 +1157,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for Future Tech Summit 2026 (FTS ’26). Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "gcet-iccisc-2026",
@@ -1135,7 +1190,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for ICCISC 2026: International Conference on Computational Intelligence and Soft Computing. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "ou-fasmi-2026",
@@ -1167,7 +1223,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for FASMI-MISI Biennial Meeting 2026. Read from the cited official source.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "t-hub-feg-2026",
@@ -1186,7 +1243,7 @@
     "sourceUrl": "https://www.t-hub.co/feg-innovation-hackathon-2026",
     "sourceType": "discovery_lead",
     "sourceStatus": "unverified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.45,
     "tags": [
       "Hackathon",
@@ -1197,9 +1254,11 @@
     "area": "Hyderabad",
     "branch": "All engineering branches",
     "year": "2026 / 2027",
-    "deadline": "Not stated",
+    "deadline": "Closed",
     "description": "Source-linked record for FEG Innovation Hackathon 2026. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "specathon-2026",
@@ -1218,7 +1277,7 @@
     "sourceUrl": "https://unstop.com/hackathons/specathon-2026-st-peters-engineering-college-1723868",
     "sourceType": "discovery_lead",
     "sourceStatus": "unverified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.35,
     "tags": [
       "Hackathon",
@@ -1229,9 +1288,11 @@
     "area": "Medchal-Malkajgiri",
     "branch": "CSE / IT",
     "year": "2026 / 2027",
-    "deadline": "2026-08-20",
+    "deadline": "Closed",
     "description": "Source-linked record for Specathon 2026. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "odoo-gcet-hackathon-2026",
@@ -1261,9 +1322,10 @@
     "area": "Medchal-Malkajgiri",
     "branch": "CSE / IT",
     "year": "2026 / 2027",
-    "deadline": "2026-09-20",
+    "deadline": "20 Sep 2026",
     "description": "Source-linked record for Odoo x GCET Hyderabad Hackathon 2026. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "open"
   },
   {
     "id": "vnr-icmacc-2026",
@@ -1295,7 +1357,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for ICMACC 2026: Microelectronics, Automation, Computing and Communications Systems. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "cvr-ice3mt-2026",
@@ -1327,7 +1390,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for ICE3MT 2026: Materials, Manufacturing and Modelling Techniques. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "isnt-nde-2026",
@@ -1359,7 +1423,8 @@
     "year": "2026 / 2027",
     "deadline": "Not stated",
     "description": "Source-linked record for NDE 2026 and AeroNDT 2026. This is an unverified discovery lead and must be confirmed from the organizer before action.",
-    "eligibility": "Check the cited organizer page for eligibility and current registration status."
+    "eligibility": "Check the cited organizer page for eligibility and current registration status.",
+    "availabilityStatus": "not_stated"
   },
   {
     "id": "gnitc-tech-horizon-2026",
@@ -1389,7 +1454,9 @@
     "lastCheckedAt": "2026-09-03T09:46:00+05:30",
     "state": "Telangana",
     "district": "Rangareddy",
-    "area": "Rangareddy"
+    "area": "Rangareddy",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "avn-promptothon-2026",
@@ -1419,7 +1486,9 @@
     "lastCheckedAt": "2026-09-03T09:46:00+05:30",
     "state": "Telangana",
     "district": "Rangareddy",
-    "area": "Rangareddy"
+    "area": "Rangareddy",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "mnitj-student-hackathon-2026",
@@ -1448,7 +1517,9 @@
     "state": "Rajasthan",
     "district": "Jaipur",
     "area": "Jaipur",
-    "eligibility": "MNIT Jaipur UG, PG and PhD students in teams of 2–5."
+    "eligibility": "MNIT Jaipur UG, PG and PhD students in teams of 2–5.",
+    "availabilityStatus": "open",
+    "deadline": "20 Sep 2026"
   },
   {
     "id": "nitkkr-sih-internal-2026",
@@ -1466,7 +1537,7 @@
     "sourceUrl": "https://nitkkr.ac.in/notification-regarding-registration-for-smart-india-hackathon-sih-2026/",
     "sourceType": "official_college",
     "sourceStatus": "verified",
-    "visibility": "published",
+    "visibility": "archived",
     "confidence": 0.93,
     "tags": [
       "hackathon",
@@ -1477,7 +1548,10 @@
     "state": "Haryana",
     "district": "Kurukshetra",
     "area": "Kurukshetra",
-    "eligibility": "Eligible NIT Kurukshetra student teams; verify the institute notice before applying."
+    "eligibility": "Eligible NIT Kurukshetra student teams; verify the institute notice before applying.",
+    "availabilityStatus": "closed",
+    "deadline": "Closed",
+    "archivedAt": "2026-09-17"
   },
   {
     "id": "nitj-icrafmn-2026",
@@ -1506,7 +1580,9 @@
     "state": "Punjab",
     "district": "Jalandhar",
     "area": "Jalandhar",
-    "eligibility": "Open to postgraduate students, PhD scholars and other eligible participants listed by the organizer."
+    "eligibility": "Open to postgraduate students, PhD scholars and other eligible participants listed by the organizer.",
+    "availabilityStatus": "open",
+    "deadline": "20 Sep 2026"
   },
   {
     "id": "sliet-techfest-2026",
@@ -1535,7 +1611,9 @@
     "state": "Punjab",
     "district": "Sangrur",
     "area": "Sangrur",
-    "eligibility": "Student participation and registration details should be confirmed on the official institute announcement."
+    "eligibility": "Student participation and registration details should be confirmed on the official institute announcement.",
+    "availabilityStatus": "open",
+    "deadline": "9 Oct 2026"
   },
   {
     "id": "nith-chemference-2026",
@@ -1564,7 +1642,9 @@
     "state": "Himachal Pradesh",
     "district": "Hamirpur",
     "area": "Hamirpur",
-    "eligibility": "Students and research scholars; check the official schedule and registration categories."
+    "eligibility": "Students and research scholars; check the official schedule and registration categories.",
+    "availabilityStatus": "open",
+    "deadline": "15 Oct 2026"
   },
   {
     "id": "iitk-ictmbm-2026",
@@ -1593,7 +1673,9 @@
     "state": "Uttar Pradesh",
     "district": "Kanpur",
     "area": "Kanpur",
-    "eligibility": "Bachelor’s, master’s and doctoral students may participate subject to the official call."
+    "eligibility": "Bachelor’s, master’s and doctoral students may participate subject to the official call.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "nituk-iicpe-2026",
@@ -1622,7 +1704,9 @@
     "state": "Uttarakhand",
     "district": "Srinagar, Pauri Garhwal",
     "area": "Srinagar, Pauri Garhwal",
-    "eligibility": "Student and research-author registration categories are listed on the official conference page."
+    "eligibility": "Student and research-author registration categories are listed on the official conference page.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "icem-emr-2026",
@@ -1651,7 +1735,9 @@
     "state": "Maharashtra",
     "district": "Pune",
     "area": "Pune",
-    "eligibility": "Students and researchers; the official event page should be checked for the current registration process."
+    "eligibility": "Students and researchers; the official event page should be checked for the current registration process.",
+    "availabilityStatus": "open",
+    "deadline": "20 Oct 2026"
   },
   {
     "id": "vvpec-semiconductor-workshop-2026",
@@ -1680,7 +1766,9 @@
     "state": "Gujarat",
     "district": "Rajkot",
     "area": "Rajkot",
-    "eligibility": "M.Tech scholars, research fellows, faculty, researchers and industry professionals as described by the organizer."
+    "eligibility": "M.Tech scholars, research fellows, faculty, researchers and industry professionals as described by the organizer.",
+    "availabilityStatus": "open",
+    "deadline": "24 Sep 2026"
   },
   {
     "id": "svnit-ai-bootcamp-2026",
@@ -1709,7 +1797,9 @@
     "state": "Gujarat",
     "district": "Surat",
     "area": "Surat",
-    "eligibility": "Check the official SVNIT event listing for registration and eligibility."
+    "eligibility": "Check the official SVNIT event listing for registration and eligibility.",
+    "availabilityStatus": "open",
+    "deadline": "25 Sep 2026"
   },
   {
     "id": "cec-ncsimep-2026",
@@ -1738,7 +1828,9 @@
     "state": "Chhattisgarh",
     "district": "Bilaspur",
     "area": "Bilaspur",
-    "eligibility": "Open to students, researchers, academicians, industry professionals and policymakers."
+    "eligibility": "Open to students, researchers, academicians, industry professionals and policymakers.",
+    "availabilityStatus": "open",
+    "deadline": "10 Oct 2026"
   },
   {
     "id": "cusat-cochinnano-2026",
@@ -1767,7 +1859,9 @@
     "state": "Kerala",
     "district": "Kochi",
     "area": "Kochi",
-    "eligibility": "Students and research participants; the official conference page lists student registration categories."
+    "eligibility": "Students and research participants; the official conference page lists student registration categories.",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "anna-sip-2026",
@@ -1796,7 +1890,9 @@
     "state": "Tamil Nadu",
     "district": "Chennai",
     "area": "Chennai",
-    "eligibility": "Full-time fifth-semester undergraduate teams of 2–3 students, subject to the official brochure rules."
+    "eligibility": "Full-time fifth-semester undergraduate teams of 2–3 students, subject to the official brochure rules.",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "vit-arc-smart-mobility-2026",
@@ -1825,7 +1921,9 @@
     "state": "Tamil Nadu",
     "district": "Vellore",
     "area": "Vellore",
-    "eligibility": "Student participation and submission requirements are provided through the official VIT event page."
+    "eligibility": "Student participation and submission requirements are provided through the official VIT event page.",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "anna-ccna-2026",
@@ -1854,7 +1952,9 @@
     "state": "Tamil Nadu",
     "district": "Chennai",
     "area": "Chennai",
-    "eligibility": "Students and learners who meet the programme’s official registration requirements."
+    "eligibility": "Students and learners who meet the programme’s official registration requirements.",
+    "availabilityStatus": "open",
+    "deadline": "22 Sep 2026"
   },
   {
     "id": "iitp-inspect-2026",
@@ -1883,7 +1983,9 @@
     "state": "Bihar",
     "district": "Patna",
     "area": "Patna",
-    "eligibility": "Full-time students with financial need and proof of acceptance or registration, as specified by the official page."
+    "eligibility": "Full-time students with financial need and proof of acceptance or registration, as specified by the official page.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "bitmesra-wocon-2026",
@@ -1912,7 +2014,9 @@
     "state": "Jharkhand",
     "district": "Ranchi",
     "area": "Ranchi",
-    "eligibility": "UG, PG and PhD students and other eligible participants described by the official workshop page."
+    "eligibility": "UG, PG and PhD students and other eligible participants described by the official workshop page.",
+    "availabilityStatus": "open",
+    "deadline": "10 Oct 2026"
   },
   {
     "id": "iitkgp-emsi-2026",
@@ -1941,7 +2045,9 @@
     "state": "West Bengal",
     "district": "Kharagpur",
     "area": "Kharagpur",
-    "eligibility": "Student and research registrations are available subject to the official conference categories."
+    "eligibility": "Student and research registrations are available subject to the official conference categories.",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "nitrkl-eis-course-2026",
@@ -1970,7 +2076,9 @@
     "state": "Odisha",
     "district": "Rourkela",
     "area": "Rourkela",
-    "eligibility": "Students and research scholars; NIT students have a fee-waiver category in the official brochure."
+    "eligibility": "Students and research scholars; NIT students have a fee-waiver category in the official brochure.",
+    "availabilityStatus": "open",
+    "deadline": "15 Nov 2026"
   },
   {
     "id": "nits-icrame-2026",
@@ -1999,7 +2107,9 @@
     "state": "Assam",
     "district": "Silchar",
     "area": "Silchar",
-    "eligibility": "Students and research scholars can use the official registration categories and fee structure."
+    "eligibility": "Students and research scholars can use the official registration categories and fee structure.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "nerist-ssame-2026",
@@ -2028,7 +2138,9 @@
     "state": "Arunachal Pradesh",
     "district": "Itanagar",
     "area": "Itanagar",
-    "eligibility": "Students and researchers; national student registration and award categories are listed by the organizer."
+    "eligibility": "Students and researchers; national student registration and award categories are listed by the organizer.",
+    "availabilityStatus": "open",
+    "deadline": "25 Oct 2026"
   },
   {
     "id": "nitm-icme-2026",
@@ -2057,7 +2169,9 @@
     "state": "Meghalaya",
     "district": "Sohra",
     "area": "Sohra",
-    "eligibility": "Students and researchers; confirm current registration availability on the official conference page."
+    "eligibility": "Students and researchers; confirm current registration availability on the official conference page.",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "tripura-cv-studentship-2026",
@@ -2086,7 +2200,9 @@
     "state": "Tripura",
     "district": "Suryamaninagar",
     "area": "Suryamaninagar",
-    "eligibility": "Eligible B.Tech CSE/IT or M.Tech students as specified in the official notice."
+    "eligibility": "Eligible B.Tech CSE/IT or M.Tech students as specified in the official notice.",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "iitj-isea-isap-2027",
@@ -2115,7 +2231,9 @@
     "state": "Jammu and Kashmir",
     "district": "Jammu",
     "area": "Jammu",
-    "eligibility": "Undergraduate, master’s and PhD students, researchers, industry professionals and other delegates listed by the organizer."
+    "eligibility": "Undergraduate, master’s and PhD students, researchers, industry professionals and other delegates listed by the organizer.",
+    "availabilityStatus": "open",
+    "deadline": "5 Dec 2026"
   },
   {
     "id": "smvdu-waste-heat-2026",
@@ -2144,7 +2262,9 @@
     "state": "Jammu and Kashmir",
     "district": "Katra, Reasi",
     "area": "Katra, Reasi",
-    "eligibility": "Students, researchers, academicians and industry participants as stated on the official workshop notice."
+    "eligibility": "Students, researchers, academicians and industry participants as stated on the official workshop notice.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "smvdu-icsmreai-2026",
@@ -2173,7 +2293,9 @@
     "state": "Jammu and Kashmir",
     "district": "Katra, Reasi",
     "area": "Katra, Reasi",
-    "eligibility": "Students, researchers and professionals interested in the listed engineering and science themes."
+    "eligibility": "Students, researchers and professionals interested in the listed engineering and science themes.",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "pu-temsmet-2026",
@@ -2202,7 +2324,9 @@
     "state": "Chandigarh",
     "district": "Chandigarh",
     "area": "Chandigarh",
-    "eligibility": "Students, researchers and professionals; confirm call-for-papers and registration dates from the linked official notice."
+    "eligibility": "Students, researchers and professionals; confirm call-for-papers and registration dates from the linked official notice.",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   },
   {
     "id": "iiitm-iciis-2026",
@@ -2232,7 +2356,9 @@
     "state": "Madhya Pradesh",
     "district": "Gwalior",
     "area": "Gwalior",
-    "eligibility": "Students, researchers and engineering professionals; camera-ready submission is listed for 30 September 2026."
+    "eligibility": "Students, researchers and engineering professionals; camera-ready submission is listed for 30 September 2026.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "gsssi-etw-icaci-2026",
@@ -2261,7 +2387,9 @@
     "state": "Karnataka",
     "district": "Mysuru",
     "area": "Mysuru",
-    "eligibility": "Students, researchers and professionals in computer science, IT and related fields."
+    "eligibility": "Students, researchers and professionals in computer science, IT and related fields.",
+    "availabilityStatus": "open",
+    "deadline": "20 Oct 2026"
   },
   {
     "id": "jnnce-mpcit-2026",
@@ -2290,7 +2418,9 @@
     "state": "Karnataka",
     "district": "Shivamogga",
     "area": "Shivamogga",
-    "eligibility": "Students, researchers, developers, engineers and practitioners; registration closes 10 November 2026."
+    "eligibility": "Students, researchers, developers, engineers and practitioners; registration closes 10 November 2026.",
+    "availabilityStatus": "open",
+    "deadline": "10 Nov 2026"
   },
   {
     "id": "ptu-icaisda-2026",
@@ -2319,7 +2449,9 @@
     "state": "Puducherry",
     "district": "Puducherry",
     "area": "Puducherry",
-    "eligibility": "Students, researchers, academicians, scientists and industry professionals."
+    "eligibility": "Students, researchers, academicians, scientists and industry professionals.",
+    "availabilityStatus": "open",
+    "deadline": "19 Oct 2026"
   },
   {
     "id": "nitgoa-icmai-mac-2026",
@@ -2348,7 +2480,9 @@
     "state": "Goa",
     "district": "Goa",
     "area": "Goa",
-    "eligibility": "Students, research scholars and young researchers across engineering, applied sciences and related disciplines."
+    "eligibility": "Students, research scholars and young researchers across engineering, applied sciences and related disciplines.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "iittp-iiot-cloud-analytics-2026",
@@ -2377,7 +2511,9 @@
     "state": "Andhra Pradesh",
     "district": "Tirupati",
     "area": "Tirupati",
-    "eligibility": "Final-year B.E./B.Tech/M.Tech students, academic staff/faculty and working professionals."
+    "eligibility": "Final-year B.E./B.Tech/M.Tech students, academic staff/faculty and working professionals.",
+    "availabilityStatus": "deadline_passed",
+    "deadline": "Deadline passed — check organizer"
   },
   {
     "id": "iiitdmk-cict-2026",
@@ -2407,7 +2543,9 @@
     "state": "Andhra Pradesh",
     "district": "Kurnool",
     "area": "Kurnool",
-    "eligibility": "Researchers, academicians, industry professionals, policymakers and PhD participants."
+    "eligibility": "Researchers, academicians, industry professionals, policymakers and PhD participants.",
+    "availabilityStatus": "open",
+    "deadline": "30 Sep 2026"
   },
   {
     "id": "mea-internship-term2-2026",
@@ -2436,7 +2574,9 @@
     "state": "Delhi",
     "district": "New Delhi",
     "area": "New Delhi",
-    "eligibility": "Indian citizens with a graduate degree or final-year graduation where an internship is mandatory; age must not exceed 25 on 31 December of the internship year."
+    "eligibility": "Indian citizens with a graduate degree or final-year graduation where an internship is mandatory; age must not exceed 25 on 31 December of the internship year.",
+    "availabilityStatus": "open",
+    "deadline": "27 Sep 2026"
   },
   {
     "id": "nielit-upwiecon-2026",
@@ -2466,6 +2606,8 @@
     "state": "Uttar Pradesh",
     "district": "Gautam Buddha Nagar",
     "area": "Gautam Buddha Nagar",
-    "eligibility": "Researchers, engineers, students and professionals in electrical, electronics and computer engineering; women in STEM are especially encouraged."
+    "eligibility": "Researchers, engineers, students and professionals in electrical, electronics and computer engineering; women in STEM are especially encouraged.",
+    "availabilityStatus": "not_stated",
+    "deadline": "Not stated"
   }
 ]
