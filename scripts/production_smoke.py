@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Read-only production smoke checks for Opportunity Atlas."""
 from __future__ import annotations
 import json
@@ -21,7 +21,7 @@ def require(condition: bool, message: str) -> None:
 status, headers, home = get(FRONTEND + "/")
 require(status == 200, f"frontend returned HTTP {status}")
 text = home.decode("utf-8", errors="replace")
-for marker in ("ATLAS_CATALOG", "data-load-more", "pageshow", "assistantModal"):
+for marker in ("STATIC_CATALOG", "data-load-more", "pageshow", "assistantModal"):
     require(marker in text, f"frontend marker missing: {marker}")
 
 status, headers, catalog_body = get(FRONTEND + "/catalog.json")
@@ -42,3 +42,4 @@ if health.get("assistant_configured") and health.get("assistant_last_error"):
     raise SystemExit("SMOKE FAIL: configured assistant reports " + str(health["assistant_last_error"]))
 
 print(json.dumps({"frontend": "ok", "catalog_events": len(records), "api": "ok", "health": health}, indent=2))
+
