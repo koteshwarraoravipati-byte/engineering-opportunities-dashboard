@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-from functools import lru_cache
 import hashlib
 import hmac
 import json
@@ -15,14 +14,14 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote, urlparse
-from typing import Any
+from typing import Any, Literal
 
 import bcrypt
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel, Field
+from fastapi.responses import FileResponse, JSONResponse, Response
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -32,7 +31,11 @@ SAVED_FILE = DATA / "saved.json"
 EVENTS_FILE = ROOT / "events.json"
 COLLEGES_FILE = ROOT / "colleges.json"
 if not EVENTS_FILE.exists(): EVENTS_FILE = ROOT.parent / "events.json"
-SECRET = os.getenv("SESSION_SECRET", "opportunity-atlas-dev-secret-change-me").encode()
+SECRET = os.getenv("SESSION_SECRET", "").encode() or None
+SECRET_LOCK = threading.Lock()
+OVERRIDES_FILE = DATA / "event_overrides.json"
+SESSION_SECRET_FILE = DATA / "session_secret"
+ADMIN_EMAILS = {email.strip().casefold() for email in os.getenv("ADMIN_EMAILS", "koteshwarraoravipati@gmail.com").split(",") if email.strip()}
 EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@gmail\.com$", re.I)
 EMAIL_STRIP_CHARS = dict.fromkeys(map(ord, "\u200b\u200c\u200d\ufeff"), None)
 LOCK = threading.Lock()
@@ -87,7 +90,7 @@ def normalize_users(raw: Any) -> dict[str, dict[str, Any]]:
             normalized[email] = user
     return normalized
 
-MONGO_URI = os.getenv("MONGODB_URI", "").strip()
+MONGO_URI = (os.getenv("MONGODB_URI", "") or os.getenv("MONGO_URI", "")).strip()
 MONGO_DB_NAME = os.getenv("MONGODB_DB", "opportunity_atlas").strip() or "opportunity_atlas"
 _MONGO_CLIENT: Any = None
 _MONGO_LOCK = threading.Lock()
@@ -238,12 +241,35 @@ def publishable_event(event: dict[str, Any]) -> bool:
     status_allowed = status_value in {"verified", "needs_review", "unverified"}
     return (str(event.get("visibility", "published")).lower() in {"published", "needs_review"} and status_allowed and all(required) and has_date_or_deadline)
 
-@lru_cache(maxsize=1)
-def load_events() -> list[dict[str, Any]]:
+def read_event_overrides() -> dict[str, dict[str, Any]]:
+    if MONGO_URI:
+        docs = mongo_call("event_overrides", lambda c: list(c.find({})))
+        return {str(d["_id"]): {k: v for k, v in d.items() if k != "_id"} for d in docs}
+    raw = read_json(OVERRIDES_FILE, {})
+    return raw if isinstance(raw, dict) else {}
+
+def write_event_override(event_id: str, value: dict[str, Any]) -> None:
+    if MONGO_URI:
+        mongo_call("event_overrides", lambda c: c.replace_one({"_id": event_id}, {"_id": event_id, **value}, upsert=True))
+    else:
+        records = read_event_overrides()
+        records[event_id] = value
+        write_json(OVERRIDES_FILE, records)
+
+def catalog_events() -> list[dict[str, Any]]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
-    items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
-    return [e for e in items if publishable_event(e)]
+    records = {e["id"]: e for i, r in enumerate(raw if isinstance(raw, list) else []) if isinstance(r, dict) for e in [normalize_event(r, i)]}
+    for event_id, override in read_event_overrides().items():
+        if override.get("deleted"):
+            records.pop(event_id, None)
+        elif isinstance(override.get("event"), dict):
+            records[event_id] = normalize_event({**override["event"], "id": event_id}, 0)
+    return list(records.values())
+
+def load_events() -> list[dict[str, Any]]:
+    # Read the persistent overlay every time: other workers' changes must be visible.
+    return [e for e in catalog_events() if publishable_event(e)]
 
 def assistant_matches(message: str, state: str = "", district: str = "") -> list[dict[str, Any]]:
     query = str(message or "").casefold()
@@ -348,7 +374,7 @@ def generate_assistant_answer(message: str, state: str = "", district: str = "")
 
 def token_for(email: str) -> str:
     payload = base64.urlsafe_b64encode(json.dumps({"email": email, "exp": int(datetime.now(timezone.utc).timestamp()) + 60 * 60 * 24 * 7}, separators=(",", ":")).encode()).decode().rstrip("=")
-    sig = hmac.new(SECRET, payload.encode(), hashlib.sha256).hexdigest()
+    sig = hmac.new(session_secret(), payload.encode(), hashlib.sha256).hexdigest()
     return payload + "." + sig
 
 def email_from_token(authorization: str | None) -> str:
@@ -356,7 +382,7 @@ def email_from_token(authorization: str | None) -> str:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Please sign in to continue")
     try:
         payload, sig = authorization.split(" ", 1)[1].split(".", 1)
-        if not hmac.compare_digest(sig, hmac.new(SECRET, payload.encode(), hashlib.sha256).hexdigest()): raise ValueError
+        if not hmac.compare_digest(sig, hmac.new(session_secret(), payload.encode(), hashlib.sha256).hexdigest()): raise ValueError
         data = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
         if int(data["exp"]) < int(datetime.now(timezone.utc).timestamp()): raise ValueError
         return normalize_email(str(data["email"]))
@@ -364,7 +390,7 @@ def email_from_token(authorization: str | None) -> str:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired. Please sign in again")
 
 def public_user(user: dict[str, Any]) -> dict[str, Any]:
-    return {"email": user["email"], "name": user.get("name") or user["email"].split("@")[0], "created_at": user.get("created_at")}
+    return {"email": user["email"], "name": user.get("name") or user["email"].split("@")[0], "created_at": user.get("created_at"), "is_admin": normalize_email(user["email"]) in ADMIN_EMAILS}
 
 def current_user(authorization: str | None = Header(default=None)) -> dict[str, Any]:
     email = email_from_token(authorization)
@@ -373,11 +399,174 @@ def current_user(authorization: str | None = Header(default=None)) -> dict[str, 
     if not user: raise HTTPException(status_code=401, detail="Account not found")
     return user
 
+def session_secret() -> bytes:
+    """Explicit configuration wins; otherwise persist one unpredictable signing key.
+
+    Never fall back to the former public development key, including during outages.
+    """
+    global SECRET
+    with SECRET_LOCK:
+        if SECRET:
+            return SECRET
+        if MONGO_URI:
+            doc = mongo_call("config", lambda c: c.find_one_and_update(
+                {"_id": "session_secret"}, {"$setOnInsert": {"value": secrets.token_hex(64)}},
+                upsert=True, return_document=True))
+            value = doc.get("value") if doc else None
+        else:
+            try:
+                # Exclusive creation avoids overwriting another worker's key.
+                fd = os.open(SESSION_SECRET_FILE, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError:
+                pass
+            else:
+                with os.fdopen(fd, "w", encoding="utf-8") as out:
+                    out.write(secrets.token_hex(64))
+                    out.flush()
+                    os.fsync(out.fileno())
+            value = SESSION_SECRET_FILE.read_text(encoding="utf-8").strip()
+        if not isinstance(value, str) or len(value) < 64:
+            raise StorageUnavailableError("Session signing key is unavailable; retry shortly.")
+        SECRET = value.encode()
+        return SECRET
+
+def current_admin(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    if normalize_email(user["email"]) not in ADMIN_EMAILS:
+        raise HTTPException(status_code=403, detail="Administrator access required")
+    return user
+
+class AdminEvent(BaseModel):
+    # Only these scalar/list model fields may enter storage; reject arbitrary keys.
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    title: str = Field(min_length=1, max_length=240)
+    organization: str = Field(min_length=1, max_length=240)
+    institution: str = Field(min_length=1, max_length=240)
+    sourceUrl: str = Field(min_length=1, max_length=2048)
+    applyUrl: str = Field(min_length=1, max_length=2048)
+    sourceStatus: Literal["verified", "needs_review", "unverified"]
+    visibility: Literal["published", "needs_review", "draft", "archived"]
+    type: str = Field(default="Opportunity", max_length=100)
+    state: str = Field(default="India", max_length=100)
+    district: str = Field(default="", max_length=150)
+    location: str = Field(default="", max_length=300)
+    branch: str = Field(default="", max_length=500)
+    year: str = Field(default="", max_length=100)
+    summary: str = Field(default="", max_length=2000)
+    description: str = Field(default="", max_length=12000)
+    eligibility: str = Field(default="", max_length=4000)
+    startAt: str | None = Field(default=None, max_length=40)
+    endAt: str | None = Field(default=None, max_length=40)
+    deadlineAt: str | None = Field(default=None, max_length=40)
+    mode: str = Field(default="", max_length=100)
+    sourceType: str = Field(default="", max_length=100)
+    availabilityStatus: str = Field(default="", max_length=100)
+    confidence: float | None = Field(default=None, ge=0, le=100)
+    tags: list[str] = Field(default_factory=list, max_length=30)
+
+    @field_validator("sourceUrl", "applyUrl")
+    @classmethod
+    def https_url(cls, value: str) -> str:
+        try:
+            parsed = urlparse(value)
+            valid = parsed.scheme == "https" and parsed.hostname and not parsed.username and not parsed.password
+            _ = parsed.port
+            if not valid or re.search(r"[\s\x00-\x1f\x7f\\]", value):
+                raise ValueError()
+        except ValueError:
+            raise ValueError("Use an absolute HTTPS URL without credentials or whitespace")
+        return value
+
+    @field_validator("startAt", "endAt", "deadlineAt")
+    @classmethod
+    def iso_date(cls, value: str | None) -> str | None:
+        if not value:
+            return None
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})?)?", value):
+            raise ValueError("Use an ISO date or datetime")
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return value
+
+    @field_validator("tags")
+    @classmethod
+    def bounded_tags(cls, value: list[str]) -> list[str]:
+        if any(len(tag) > 100 for tag in value):
+            raise ValueError("Tags must be at most 100 characters")
+        return value
+
+    @model_validator(mode="after")
+    def publication_checks(self):
+        if self.visibility == "published" and self.sourceStatus == "verified":
+            if not has_official_source(self.model_dump()) or not (self.startAt or self.endAt or self.deadlineAt):
+                raise ValueError("Verified published opportunities require an official institutional HTTPS source and an ISO date")
+        return self
+
+def admin_event_record(payload: AdminEvent, event_id: str, previous: dict[str, Any] | None = None) -> dict[str, Any]:
+    fields = set(AdminEvent.model_fields)
+    # Preserve only explicitly supported metadata when a UI omits it on an edit.
+    values = payload.model_dump()
+    for key, value in (previous or {}).items():
+        if key not in fields or key in payload.model_fields_set:
+            continue
+        try:
+            # Legacy malformed metadata must not turn a valid edit into a 500.
+            candidate = AdminEvent.model_validate({**values, key: value})
+        except ValueError:
+            continue
+        values = candidate.model_dump()
+    return normalize_event({**values, "id": event_id}, 0)
+
+@app.get("/api/admin/events")
+def admin_events(user: dict[str, Any] = Depends(current_admin)) -> dict[str, Any]:
+    return {"events": catalog_events(), "storage": "mongodb" if MONGO_URI else "local"}
+
+@app.post("/api/admin/events", status_code=201)
+def create_admin_event(payload: AdminEvent, user: dict[str, Any] = Depends(current_admin)) -> dict[str, Any]:
+    event = admin_event_record(payload, "admin-" + secrets.token_hex(12))
+    with LOCK:
+        write_event_override(event["id"], {"event": event})
+    return event
+
+@app.put("/api/admin/events/{event_id}")
+def update_admin_event(event_id: str, payload: AdminEvent, user: dict[str, Any] = Depends(current_admin)) -> dict[str, Any]:
+    with LOCK:
+        previous = next((e for e in catalog_events() if e["id"] == event_id), None)
+        # The frontend static seed can contain IDs absent from this backend seed.
+        if len(event_id) > 200 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]*", event_id):
+            raise HTTPException(status_code=422, detail="Invalid opportunity ID")
+        event = admin_event_record(payload, event_id, previous)
+        write_event_override(event_id, {"event": event})
+    return event
+
+@app.delete("/api/admin/events/{event_id}")
+def delete_admin_event(event_id: str, user: dict[str, Any] = Depends(current_admin)) -> dict[str, str]:
+    with LOCK:
+        if len(event_id) > 200 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]*", event_id):
+            raise HTTPException(status_code=422, detail="Invalid opportunity ID")
+        # Idempotent tombstones also hide frontend-only seed records.
+        write_event_override(event_id, {"deleted": True})
+    return {"deleted": event_id}
+
+@app.get("/api/catalog/overrides")
+def public_catalog_overrides(response: Response) -> dict[str, Any]:
+    response.headers["Cache-Control"] = "no-store"
+    visible, deleted_ids = [], []
+    for event_id, override in read_event_overrides().items():
+        event = normalize_event({**override.get("event", {}), "id": event_id}, 0)
+        if override.get("deleted") or not publishable_event(event):
+            deleted_ids.append(event_id)
+        else:
+            visible.append(event)
+    return {"events": visible, "deleted_ids": deleted_ids}
+
+@app.get("/admin")
+def admin_page() -> FileResponse:
+    return FileResponse(ROOT / "admin.html")
+
 @app.get("/api/health")
 def health() -> dict[str, Any]:
     raw = read_json(EVENTS_FILE, [])
     if isinstance(raw, dict): raw = raw.get("events", [])
-    items = [normalize_event(e, i) for i, e in enumerate(raw)] if isinstance(raw, list) else []
+    items = catalog_events()
     published = [e for e in items if publishable_event(e)]
     return {"status":"ok", "service":"opportunity-atlas-api", "events":len(published), "source_records":len(raw) if isinstance(raw, list) else 0, "source_file_found":EVENTS_FILE.exists(), "verified_records":sum(1 for e in items if str(e.get("sourceStatus", "")).lower() == "verified"), "dated_records":sum(1 for e in items if e.get("startAt") or e.get("endAt") or e.get("deadlineAt")), "official_url_records":sum(1 for e in items if has_official_source(e)), "archived_records":sum(1 for e in items if str(e.get("visibility", "")).lower() == "archived"), "deadline_passed_records":sum(1 for e in items if str(e.get("availabilityStatus", "")).lower() == "deadline_passed"), "assistant_provider":ASSISTANT_PROVIDER, "assistant_model":ASSISTANT_MODEL, "assistant_last_model":ASSISTANT_LAST_MODEL, "assistant_configured":bool(ASSISTANT_API_KEY), "assistant_last_error":ASSISTANT_LAST_ERROR, "build":os.getenv("RENDER_GIT_COMMIT", "unknown")[:7]}
 
@@ -386,6 +575,8 @@ def register(payload: RegisterCredentials) -> dict[str, Any]:
     email = normalize_email(payload.email)
     pin = payload.recovery_pin.strip()
     if not EMAIL_RE.fullmatch(email): raise HTTPException(status_code=422, detail="Use a valid Gmail address")
+    if email in ADMIN_EMAILS:
+        raise HTTPException(status_code=403, detail="Administrator accounts cannot be created through public registration")
     if len(payload.password) < 8: raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
     if not re.fullmatch(r"\d{4,12}", pin): raise HTTPException(status_code=422, detail="Screen lock / recovery PIN must be 4â€“12 digits")
     with LOCK:
