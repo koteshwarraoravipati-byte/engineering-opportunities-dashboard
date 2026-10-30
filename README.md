@@ -30,3 +30,13 @@ Open `http://127.0.0.1:8000`.
 5. The API performs a second publication guard before returning records.
 
 Third-party platforms remain blocked: Google can discover a lead, but a third-party-only listing is never published without an official college evidence page.
+
+## Admin management
+
+Open `/admin` and sign in with an existing server-authorized Atlas account. The owner-authorized initial administrator is `koteshwarraoravipati@gmail.com`; override `ADMIN_EMAILS` on the API host with a comma-separated allowlist (an empty value disables admin access). Public registration cannot create accounts for reserved admin addresses.
+
+Admins can create, edit, draft, archive, and delete opportunities. All `/api/admin/events` operations enforce server-side authentication and authorization. Public `/api/catalog/overrides` returns only publishable changes and hidden/deleted IDs; the student dashboard merges these with its static seed on refresh.
+
+Configure `MONGODB_URI` for durable `event_overrides` storage across Render deployments. Without MongoDB, overrides use `data/event_overrides.json` and need a persistent disk. Session signing uses `SESSION_SECRET` if configured, otherwise a random key persisted in MongoDB or local storage; older sessions may require signing in again after migration. Never set a publicly known session secret.
+
+Tests: `uv run --no-project --with fastapi --with httpx --with bcrypt --with pymongo --with pytest python -m pytest test_admin.py -q`.
