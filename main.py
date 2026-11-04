@@ -502,6 +502,8 @@ class AdminEvent(BaseModel):
     def publication_checks(self):
         if self.sourceType == "company_provider" and self.sourceStatus == "verified":
             raise ValueError("Company-advertised listings must not use institution-verified status")
+        if self.visibility in {"published", "needs_review"} and not (self.startAt or self.endAt or self.deadlineAt):
+            raise ValueError("Public opportunities require a start date, end date or deadline; save an undated record as draft")
         if self.visibility == "published" and self.sourceStatus == "verified":
             if not has_official_source(self.model_dump()) or not (self.startAt or self.endAt or self.deadlineAt):
                 raise ValueError("Verified published opportunities require an official institutional HTTPS source and an ISO date")
