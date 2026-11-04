@@ -223,7 +223,7 @@ def write_json(path: Path, value: Any) -> None:
     temp.replace(path)
 
 def normalize_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
-    metadata = {key: raw.get(key, "") for key in ("fee", "programType", "affiliationNote", "sourceCheckedAt")}
+    metadata = {key: raw.get(key, "") for key in ("fee", "programType", "affiliationNote", "sourceCheckedAt", "affiliationStatus", "affiliationEvidenceUrl", "companyPartner", "companyRole")}
     return {**metadata,"id": str(raw.get("id") or raw.get("event_id") or f"opportunity-{index}"), "title": raw.get("title") or raw.get("name") or "Engineering opportunity", "organization": raw.get("organization") or raw.get("organizer") or raw.get("company") or "Local engineering community", "organizer": raw.get("organizer") or raw.get("organization") or raw.get("company") or "Local engineering community", "institution": raw.get("institution") or raw.get("college") or raw.get("organization") or "Engineering student community", "location": raw.get("location") or raw.get("venue") or "India", "venue": raw.get("venue") or raw.get("location") or "India", "state": raw.get("state") or "India", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "college": raw.get("college") or raw.get("institution") or "Indian engineering college", "branch": raw.get("branch") or raw.get("eligibility") or "All engineering branches", "year": raw.get("year") or "2025 / 2026", "type": raw.get("type") or raw.get("eventType") or "Opportunity", "mode": raw.get("mode") or "See organizer page", "startAt": raw.get("startAt"), "endAt": raw.get("endAt"), "deadline": raw.get("deadline") or raw.get("deadlineAt") or "Rolling", "deadlineAt": raw.get("deadlineAt"), "summary": raw.get("summary") or raw.get("description") or "Explore this engineering opportunity.", "description": raw.get("description") or raw.get("summary") or "Details available from the organizer.", "eligibility": raw.get("eligibility") or "Check the organizer page for eligibility details.", "applyUrl": raw.get("applyUrl") or raw.get("registrationUrl") or raw.get("url") or "#", "sourceUrl": raw.get("sourceUrl"), "sourceType": raw.get("sourceType") or raw.get("source_type") or "", "sourceStatus": raw.get("sourceStatus") or "verified", "visibility": raw.get("visibility") or "published", "availabilityStatus": raw.get("availabilityStatus") or "", "state": raw.get("state") or "India", "district": raw.get("district") or raw.get("area") or "Warangal", "area": raw.get("area") or raw.get("district") or "Warangal", "confidence": raw.get("confidence"), "tags": raw.get("tags") or [raw.get("type") or "Opportunity"]}
 
 def has_official_source(event: dict[str, Any]) -> bool:
@@ -461,6 +461,10 @@ class AdminEvent(BaseModel):
     mode: str = Field(default="", max_length=100)
     fee: str = Field(default="", max_length=500)
     programType: str = Field(default="", max_length=200)
+    affiliationStatus: Literal["", "officially_confirmed", "company_advertised", "venue_only", "unknown"] = ""
+    affiliationEvidenceUrl: str = Field(default="", max_length=2048)
+    companyPartner: str = Field(default="", max_length=240)
+    companyRole: str = Field(default="", max_length=500)
     affiliationNote: str = Field(default="", max_length=1500)
     sourceCheckedAt: str = Field(default="", max_length=40)
     sourceType: str = Field(default="", max_length=100)
@@ -481,6 +485,11 @@ class AdminEvent(BaseModel):
             raise ValueError("Use an absolute HTTPS URL without credentials or whitespace")
         return value
 
+    @field_validator("affiliationEvidenceUrl")
+    @classmethod
+    def evidence_url(cls, value: str) -> str:
+        return cls.https_url(value) if value else ""
+
     @field_validator("startAt", "endAt", "deadlineAt")
     @classmethod
     def iso_date(cls, value: str | None) -> str | None:
@@ -500,6 +509,9 @@ class AdminEvent(BaseModel):
 
     @model_validator(mode="after")
     def publication_checks(self):
+        if self.affiliationStatus == "officially_confirmed":
+            if self.sourceType == "company_provider" or self.sourceStatus != "verified" or not self.companyPartner or not self.companyRole or not has_official_source({"sourceUrl": self.affiliationEvidenceUrl}):
+                raise ValueError("Official institute-company confirmation requires verified source status, a named company and role, and official institutional HTTPS evidence")
         if self.sourceType == "company_provider" and self.sourceStatus == "verified":
             raise ValueError("Company-advertised listings must not use institution-verified status")
         if self.visibility in {"published", "needs_review"} and not (self.startAt or self.endAt or self.deadlineAt):
