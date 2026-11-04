@@ -1,0 +1,24 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8'),admin=fs.readFileSync(path.join(__dirname,'admin.html'),'utf8');
+for(const source of [html,admin])for(const match of source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))if(match[1])new vm.Script(match[1]);
+const helpers=html.split('// BEGIN CATALOG SYNC HELPERS')[1].split('// END CATALOG SYNC HELPERS')[0];
+const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{textContent:''});return nodes.get(id)};
+let payload={events:[],deleted_ids:[]},calls=0,renders=0,fail=false;
+const ctx=vm.createContext({API_BASE:'https://example.test',events:[{id:'seed',title:'Seed'}],normalizeEvent:e=>e,$:node,currentUser:{email:'test'},token:'test',document:{hidden:false},Date,AbortSignal,fetch:async(url,opts)=>{calls++;assert.equal(opts.cache,'no-store');if(fail)throw Error('offline');return {ok:true,json:async()=>payload}},render:()=>renders++});
+vm.runInContext(helpers,ctx);
+(async()=>{
+ payload={events:[{id:'new',title:'New published record'}],deleted_ids:[]};
+ await ctx.refreshCatalogUpdates(true);assert.equal(ctx.events.length,2);assert.equal(renders,1);
+ payload={events:[{id:'new',title:'Edited record'}],deleted_ids:[]};await ctx.refreshCatalogUpdates(true);assert.equal(ctx.events.find(e=>e.id==='new').title,'Edited record');
+ payload={events:[],deleted_ids:['new']};await ctx.refreshCatalogUpdates(true);assert.equal(ctx.events.length,1);
+ payload={events:[{id:'new',title:'Republished'}],deleted_ids:[]};await ctx.refreshCatalogUpdates(true);assert.equal(ctx.events.length,2);
+ let before=calls;await Promise.all([ctx.refreshCatalogUpdates(true),ctx.refreshCatalogUpdates(true)]);assert.equal(calls,before+1,'deduplicate concurrent requests');
+ fail=true;await ctx.refreshCatalogUpdates(true);assert.equal(ctx.events.length,2,'retain last good data on failure');assert.match(node('catalogSyncStatus').textContent,/unavailable/);
+ fail=false;payload={bad:'shape'};await ctx.refreshCatalogUpdates(true);assert.equal(ctx.events.length,2,'invalid response cannot wipe catalog');
+ ctx.document.hidden=true;before=calls;await ctx.refreshCatalogUpdates(true);assert.equal(calls,before,'hidden tab does not poll');
+ ctx.document.hidden=false;ctx.currentUser=null;await ctx.refreshCatalogUpdates(true);assert.equal(calls,before,'signed out does not poll');
+ assert.match(html,/setInterval\(\(\)=>refreshCatalogUpdates\(\),30000\)/);assert.match(html,/atlas_catalog_changed/);assert.match(html,/visibilitychange/);
+ assert.match(admin,/Publish to student page/);assert.match(admin,/Draft saved privately/);assert.match(admin,/publicData.events\?\.some/);assert.match(admin,/notifyCatalogChanged/);
+ console.log('PASS: catalog create/edit/hide/republish sync, deduplication, failure handling, background/signed-out guards, publication controls and script syntax');
+})().catch(e=>{console.error(e);process.exitCode=1});
