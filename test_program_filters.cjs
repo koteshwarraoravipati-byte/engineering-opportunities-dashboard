@@ -51,10 +51,10 @@ for(const id of ['costFilter','deliveryFilter','programTypeFilter']){
  assert.match(html,new RegExp('<select id="'+id+'" aria-label="[^"]+" aria-describedby="programFilterHelp">'));assertions++;
  assert.match(html,new RegExp("'"+id+"'"));assertions++;
 }
-assert.match(html,/\['deadlineSort','availabilityFilter','providerFilter','costFilter','deliveryFilter','programTypeFilter'\]\.forEach\(id=>\$\(id\)\.addEventListener\('change',\(\)=>\{resetVisible\(\);render\(\)\}\)\)/);assertions++;
+assert.match(html,/\['deadlineSort','availabilityFilter','providerFilter','costFilter','deliveryFilter','programTypeFilter','affiliationFilter'\]\.forEach\(id=>\$\(id\)\.addEventListener\('change',\(\)=>\{resetVisible\(\);render\(\)\}\)\)/);assertions++;
 assert.match(html,/statusBadge\(e\)\+programBadges\(e\)/);assertions++;
 assert.match(html,/modalMeta'\)\.innerHTML=programBadges\(e\)/);assertions++;
-assert.match(html,/programLabels\(e\)\.map\(label=>'<span>'\+escapeHtml\(label\)/);assertions++;
+assert.match(html,/\[\.\.\.programLabels\(e\),affiliationLabel\(e\)\]\.map\(label=>'<span>'\+escapeHtml\(label\)/);assertions++;
 assert.match(html,/opportunityStatus\(e\)!=='Closed'&&matchesProgramFilters\(e,currentProgramFilters\(\)\)/);assertions++;
 assert.match(html,/independent of your dashboard filters/);assertions++;
 assert.match(html,/Unknown is not assumed free or an employment internship/);assertions++;
