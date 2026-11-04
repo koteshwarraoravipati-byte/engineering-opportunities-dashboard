@@ -223,3 +223,19 @@ def test_company_listing_metadata_survives_admin_edits(client):
 def test_company_advertisement_cannot_be_institution_verified(client):
     response = client.post("/api/admin/events", json=opportunity(sourceType="company_provider"), headers=headers())
     assert response.status_code == 422
+
+
+@pytest.mark.parametrize("visibility", ["published", "needs_review"])
+@pytest.mark.parametrize("source_status", ["needs_review", "unverified"])
+def test_public_undated_records_rejected_instead_of_silently_hidden(client, visibility, source_status):
+    body = opportunity(visibility=visibility, sourceStatus=source_status, startAt=None, endAt=None, deadlineAt=None)
+    response = client.post("/api/admin/events", json=body, headers=headers())
+    assert response.status_code == 422
+    body["visibility"] = "draft"
+    created = client.post("/api/admin/events", json=body, headers=headers())
+    assert created.status_code == 201
+    event_id = created.json()["id"]
+    assert event_id not in {e["id"] for e in client.get("/api/catalog/overrides").json()["events"]}
+    body.update(visibility="published", startAt="2026-11-12")
+    assert client.put(f"/api/admin/events/{event_id}", json=body, headers=headers()).status_code == 200
+    assert event_id in {e["id"] for e in client.get("/api/catalog/overrides").json()["events"]}
