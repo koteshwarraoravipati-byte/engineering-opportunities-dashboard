@@ -239,3 +239,19 @@ def test_public_undated_records_rejected_instead_of_silently_hidden(client, visi
     body.update(visibility="published", startAt="2026-11-12")
     assert client.put(f"/api/admin/events/{event_id}", json=body, headers=headers()).status_code == 200
     assert event_id in {e["id"] for e in client.get("/api/catalog/overrides").json()["events"]}
+
+
+def test_affiliation_metadata_round_trip_and_guard(client):
+    fields = {"affiliationStatus": "officially_confirmed", "affiliationEvidenceUrl": "https://example.ac.in/programme", "companyPartner": "Example Ltd", "companyRole": "Delivery partner"}
+    response = client.post("/api/admin/events", json=opportunity(**fields), headers=headers())
+    assert response.status_code == 201, response.text
+    event_id = response.json()["id"]
+    event = next(e for e in client.get("/api/catalog/overrides").json()["events"] if e["id"] == event_id)
+    for key, value in fields.items():
+        assert event[key] == value
+    for changes in [{"companyPartner": ""}, {"companyRole": ""}, {"affiliationEvidenceUrl": "https://company.example/claim"}, {"sourceStatus": "unverified"}, {"sourceType": "company_provider"}, {"affiliationEvidenceUrl": "javascript:alert(1)"}, {"affiliationStatus": "fabricated"}]:
+        bad = client.post("/api/admin/events", json=opportunity(**{**fields, **changes}), headers=headers())
+        assert bad.status_code == 422, bad.text
+    for status in ["company_advertised", "venue_only", "unknown"]:
+        result = client.post("/api/admin/events", json=opportunity(affiliationStatus=status), headers=headers())
+        assert result.status_code == 201, result.text
