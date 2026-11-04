@@ -204,3 +204,22 @@ def test_frontend_only_ids_support_edit_and_tombstone(client):
     assert "another-static-only-id" in client.get("/api/catalog/overrides").json()["deleted_ids"]
     assert client.delete("/api/admin/events/another-static-only-id", headers=headers()).status_code == 200
     assert client.put("/api/admin/events/" + "x" * 201, json=opportunity(), headers=headers()).status_code == 422
+
+
+def test_company_listing_metadata_survives_admin_edits(client):
+    body = opportunity(sourceType="company_provider", sourceStatus="unverified", sourceUrl="https://provider.example/workshop", fee="INR 2100", programType="Paid workshop", affiliationNote="Venue only; endorsement not independently verified", sourceCheckedAt="2026-11-04")
+    created = client.post("/api/admin/events", json=body, headers=headers())
+    assert created.status_code == 201, created.text
+    event_id = created.json()["id"]
+    public = next(e for e in main.load_events() if e["id"] == event_id)
+    for key in ("fee", "programType", "affiliationNote", "sourceCheckedAt", "sourceType"):
+        assert public[key] == body[key]
+    edited = client.put(f"/api/admin/events/{event_id}", json=opportunity(sourceStatus="unverified", sourceUrl=body["sourceUrl"]), headers=headers())
+    assert edited.status_code == 200, edited.text
+    assert edited.json()["fee"] == body["fee"]
+    assert edited.json()["sourceType"] == "company_provider"
+
+
+def test_company_advertisement_cannot_be_institution_verified(client):
+    response = client.post("/api/admin/events", json=opportunity(sourceType="company_provider"), headers=headers())
+    assert response.status_code == 422
